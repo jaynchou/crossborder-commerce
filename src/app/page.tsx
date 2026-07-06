@@ -1,9 +1,25 @@
 import Link from "next/link";
-import { listProducts } from "@/lib/store";
+import {
+  calculateCart,
+  listCategories,
+  listCoupons,
+  listProducts,
+  listShippingRates
+} from "@/lib/store";
 
 export default function StorefrontPage() {
   const products = listProducts();
   const featured = products.filter((product) => product.featured);
+  const categories = listCategories();
+  const coupons = listCoupons();
+  const shippingRates = listShippingRates("US");
+  const quote = calculateCart(
+    [
+      { productId: "album-cloud-001", quantity: 1 },
+      { productId: "album-tea-002", quantity: 2 }
+    ],
+    { country: "US", couponCode: "LAUNCH10", shippingRateId: "standard-global" }
+  );
 
   return (
     <main>
@@ -11,7 +27,8 @@ export default function StorefrontPage() {
         <nav className="nav">
           <strong>{process.env.NEXT_PUBLIC_STORE_NAME ?? "CrossBorder Commerce"}</strong>
           <div>
-            <a href="#products">商品</a>
+            <a href="#products">Products</a>
+            <a href="#checkout">Checkout</a>
             <Link href="/admin">Admin</Link>
           </div>
         </nav>
@@ -31,8 +48,13 @@ export default function StorefrontPage() {
 
       <section className="section" id="products">
         <div className="sectionHeader">
-          <p className="eyebrow">Featured products</p>
+          <p className="eyebrow">Catalog and categories</p>
           <h2>Starter catalog</h2>
+        </div>
+        <div className="categoryBar" aria-label="Product categories">
+          {categories.map((category) => (
+            <span key={category}>{category}</span>
+          ))}
         </div>
         <div className="grid">
           {featured.map((product) => (
@@ -47,6 +69,9 @@ export default function StorefrontPage() {
                   ))}
                 </div>
                 <h3>{product.title}</h3>
+                <p className="metaLine">
+                  SKU {product.sku} · Ships from {product.shipFrom} · Origin {product.originCountry}
+                </p>
                 <p>{product.description}</p>
                 <div className="priceRow">
                   <strong>${product.price}</strong>
@@ -56,6 +81,51 @@ export default function StorefrontPage() {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="section sectionSplit" id="checkout">
+        <div>
+          <p className="eyebrow">Cart, coupons, shipping, tax</p>
+          <h2>Checkout quote preview</h2>
+          <p className="sectionCopy">
+            This panel renders the backend pricing result for a sample US cart. It includes stock
+            checks, coupon discount, shipping, tax, and final total.
+          </p>
+          <div className="summaryPanel">
+            {quote.items.map((item) => (
+              <div className="summaryRow" key={item.productId}>
+                <span>{item.product.title} x {item.quantity}</span>
+                <strong>${item.subtotal}</strong>
+              </div>
+            ))}
+            <div className="summaryRow"><span>Subtotal</span><strong>${quote.subtotal}</strong></div>
+            <div className="summaryRow"><span>Coupon {quote.coupon?.code}</span><strong>-${quote.discount}</strong></div>
+            <div className="summaryRow"><span>Shipping {quote.shippingRate?.name}</span><strong>${quote.shipping}</strong></div>
+            <div className="summaryRow"><span>Tax</span><strong>${quote.tax}</strong></div>
+            <div className="summaryRow totalRow"><span>Total</span><strong>${quote.total}</strong></div>
+          </div>
+        </div>
+
+        <div className="sideStack">
+          <div className="panel compactPanel">
+            <h3>Coupons</h3>
+            {coupons.map((coupon) => (
+              <div className="miniRow" key={coupon.code}>
+                <span>{coupon.code}</span>
+                <strong>{coupon.type === "percentage" ? `${coupon.value}%` : `$${coupon.value}`}</strong>
+              </div>
+            ))}
+          </div>
+          <div className="panel compactPanel">
+            <h3>Shipping rates</h3>
+            {shippingRates.map((rate) => (
+              <div className="miniRow" key={rate.id}>
+                <span>{rate.name}</span>
+                <strong>${rate.basePrice}+ · {rate.etaDays} days</strong>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>
