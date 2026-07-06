@@ -1,0 +1,98 @@
+export type Product = {
+  id: string;
+  sku: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  price: number;
+  currency: string;
+  originalPrice?: number;
+  category: string;
+  originCountry: string;
+  shipFrom: string;
+  weightGrams: number;
+  stock: number;
+  reserved: number;
+  images: string[];
+  tags: string[];
+  featured: boolean;
+  status: "active" | "draft";
+};
+
+export type CartItem = {
+  productId: string;
+  quantity: number;
+};
+
+export type Address = {
+  name: string;
+  phone: string;
+  email?: string;
+  country: string;
+  province: string;
+  city: string;
+  line1: string;
+  postalCode: string;
+};
+
+export type Customer = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  country: string;
+  createdAt: string;
+};
+
+export type OrderStatus =
+  | "pending_payment"
+  | "paid"
+  | "processing"
+  | "fulfilled"
+  | "cancelled"
+  | "refunded";
+
+export type PaymentStatus = "unpaid" | "authorized" | "paid" | "failed" | "refunded";
+export type FulfillmentStatus = "unfulfilled" | "partial" | "fulfilled";
+
+export type Order = {
+  id: string;
+  customerId?: string;
+  customer: Address;
+  items: CartItem[];
+  subtotal: number;
+  discount: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  currency: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  fulfillmentStatus: FulfillmentStatus;
+  trackingNumber?: string;
+  createdAt: string;
+};
+
+export type Coupon = {
+  code: string;
+  type: "percentage" | "fixed";
+  value: number;
+  active: boolean;
+  minSubtotal?: number;
+};
+
+export type ShippingRate = {
+  id: string;
+  name: string;
+  countries: string[];
+  basePrice: number;
+  perKgPrice: number;
+  etaDays: string;
+};
+
+export type StoreSettings = {
+  name: string;
+  defaultCurrency: string;
+  supportedCountries: string[];
+  taxRate: number;
+};

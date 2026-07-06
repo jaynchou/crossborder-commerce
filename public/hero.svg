@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="电商商品陈列背景">
+  <rect width="1600" height="900" fill="#36533f"/>
+  <rect x="860" y="90" width="420" height="620" rx="34" fill="#f4f1e6"/>
+  <rect x="930" y="165" width="280" height="210" rx="22" fill="#dce8ca"/>
+  <rect x="930" y="420" width="280" height="38" rx="19" fill="#1d6b4a"/>
+  <rect x="930" y="490" width="210" height="28" rx="14" fill="#adc49a"/>
+  <rect x="930" y="545" width="250" height="28" rx="14" fill="#adc49a"/>
+  <circle cx="1115" cy="260" r="76" fill="#c69d63"/>
+  <path d="M1030 313c44-71 126-75 176 0z" fill="#e8d3a9"/>
+  <rect x="1240" y="250" width="180" height="290" rx="26" fill="#e6f2cb"/>
+  <rect x="1280" y="308" width="100" height="120" rx="16" fill="#1d6b4a"/>
+  <rect x="620" y="245" width="260" height="360" rx="28" fill="#dfe9d7"/>
+  <path d="M673 360h154l-26 150H699z" fill="#bf8550"/>
+  <path d="M705 360c8-53 83-53 91 0" fill="none" stroke="#6d5139" stroke-width="16"/>
+</svg>

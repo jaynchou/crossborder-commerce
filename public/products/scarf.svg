@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="羊绒围巾">
+  <rect width="400" height="300" fill="#edf3e9"/>
+  <path d="M100 88h168c42 0 68 25 68 62s-26 62-68 62H100z" fill="#d9b78c"/>
+  <path d="M102 88v124c-24 0-44-28-44-62s20-62 44-62z" fill="#c99a67"/>
+  <path d="M150 88v124M206 88v124M262 88v124" stroke="#f7e9d2" stroke-width="10"/>
+</svg>

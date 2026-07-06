@@ -1,0 +1,8 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      ADMIN_TOKEN: change-this-admin-token
+      NEXT_PUBLIC_STORE_NAME: 微购相册精选

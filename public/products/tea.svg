@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="冷泡茶礼盒">
+  <rect width="400" height="300" fill="#edf3e9"/>
+  <rect x="92" y="72" width="216" height="156" rx="20" fill="#1d6b4a"/>
+  <rect x="122" y="100" width="156" height="100" rx="14" fill="#e6f2cb"/>
+  <circle cx="200" cy="150" r="34" fill="#c69d63"/>
+  <path d="M183 148c18-38 46-30 50-4-14 1-28 6-50 4z" fill="#496b38"/>
+</svg>

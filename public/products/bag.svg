@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="通勤托特包">
+  <rect width="400" height="300" fill="#edf3e9"/>
+  <path d="M112 118h176l-18 120H130z" fill="#b98b5e"/>
+  <path d="M152 118c8-58 88-58 96 0" fill="none" stroke="#5b3d2e" stroke-width="18"/>
+  <rect x="156" y="152" width="88" height="48" rx="10" fill="#e0c6a5"/>
+</svg>
