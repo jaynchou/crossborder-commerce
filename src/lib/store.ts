@@ -3,8 +3,14 @@ import type {
   CartItem,
   Coupon,
   Customer,
+  MediaAsset,
   Order,
+  PaymentMethod,
   Product,
+  ProductAttribute,
+  ProductVariant,
+  Refund,
+  Review,
   ShippingRate,
   StoreSettings
 } from "./types";
@@ -83,6 +89,41 @@ const coupons: Coupon[] = [
   { code: "FREESHIP", type: "fixed", value: 8, active: true, minSubtotal: 60 }
 ];
 
+const productAttributes: ProductAttribute[] = [
+  { id: "attr-color", name: "Color", values: ["Stone", "Sage", "Black"], visible: true, variation: true },
+  { id: "attr-size", name: "Size", values: ["S", "M", "L"], visible: true, variation: true },
+  { id: "attr-material", name: "Material", values: ["Merino blend", "Canvas", "Tea leaves"], visible: true, variation: false }
+];
+
+const productVariants: ProductVariant[] = [
+  {
+    id: "var-scarf-stone",
+    productId: "album-cloud-001",
+    sku: "CB-SCARF-001-STONE",
+    attributes: { Color: "Stone", Size: "M" },
+    price: 39,
+    stock: 32,
+    weightGrams: 320,
+    image: "/products/scarf.svg"
+  },
+  {
+    id: "var-bag-black",
+    productId: "album-bag-003",
+    sku: "CB-BAG-003-BLK",
+    attributes: { Color: "Black" },
+    price: 45,
+    stock: 18,
+    weightGrams: 780,
+    image: "/products/bag.svg"
+  }
+];
+
+const mediaAssets: MediaAsset[] = [
+  { id: "media-scarf", fileName: "scarf.svg", url: "/products/scarf.svg", type: "image", alt: "Merino Travel Scarf", sizeKb: 2, usedBy: ["CB-SCARF-001"] },
+  { id: "media-tea", fileName: "tea.svg", url: "/products/tea.svg", type: "image", alt: "Cold Brew Tea Set", sizeKb: 2, usedBy: ["CB-TEA-002"] },
+  { id: "media-bag", fileName: "bag.svg", url: "/products/bag.svg", type: "image", alt: "Packable Daily Tote", sizeKb: 2, usedBy: ["CB-BAG-003"] }
+];
+
 const shippingRates: ShippingRate[] = [
   {
     id: "standard-global",
@@ -113,6 +154,12 @@ const customers: Customer[] = [
   }
 ];
 
+const paymentMethods: PaymentMethod[] = [
+  { id: "pay-stripe", name: "Credit card", provider: "stripe", enabled: false, currencies: ["USD", "EUR", "GBP"] },
+  { id: "pay-paypal", name: "PayPal", provider: "paypal", enabled: false, currencies: ["USD", "EUR", "GBP"] },
+  { id: "pay-manual", name: "Manual test payment", provider: "manual", enabled: true, currencies: ["USD"] }
+];
+
 const orders: Order[] = [
   {
     id: "CB20260706001",
@@ -141,6 +188,15 @@ const orders: Order[] = [
   }
 ];
 
+const refunds: Refund[] = [
+  { id: "ref_demo_001", orderId: "CB20260706001", amount: 12, currency: "USD", reason: "Partial shipping adjustment", status: "requested" }
+];
+
+const reviews: Review[] = [
+  { id: "rev_demo_001", productId: "album-cloud-001", customerName: "Demo Buyer", rating: 5, status: "approved", body: "Soft and easy to gift." },
+  { id: "rev_demo_002", productId: "album-tea-002", customerName: "Wholesale Tester", rating: 4, status: "pending", body: "Good starter SKU, needs stronger packaging." }
+];
+
 export function listProducts() {
   return products.filter((product) => product.status === "active");
 }
@@ -165,6 +221,23 @@ export function listCategoryStats() {
   });
 }
 
+export function listTags() {
+  return Array.from(new Set(products.flatMap((product) => product.tags))).sort();
+}
+
+export function listProductAttributes() {
+  return productAttributes;
+}
+
+export function listProductVariants(productId?: string) {
+  if (!productId) return productVariants;
+  return productVariants.filter((variant) => variant.productId === productId);
+}
+
+export function listMediaAssets() {
+  return mediaAssets;
+}
+
 export function getProduct(id: string) {
   return products.find((product) => product.id === id);
 }
@@ -180,6 +253,18 @@ export function createProduct(input: Omit<Product, "id"> & { id?: string }) {
 
 export function listCoupons() {
   return coupons;
+}
+
+export function listPaymentMethods() {
+  return paymentMethods;
+}
+
+export function listRefunds() {
+  return refunds;
+}
+
+export function listReviews() {
+  return reviews;
 }
 
 export function validateCoupon(code: string, subtotal: number) {
@@ -306,6 +391,21 @@ export function getMetrics() {
     customers: customers.length,
     lowStock: products.filter((product) => product.stock - product.reserved < 50).length,
     currency: settings.defaultCurrency
+  };
+}
+
+export function getReports() {
+  const revenue = orders.reduce((sum, order) => sum + order.total, 0);
+  const units = orders.reduce((sum, order) => sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0);
+  const averageOrderValue = orders.length ? roundMoney(revenue / orders.length) : 0;
+
+  return {
+    revenue: roundMoney(revenue),
+    units,
+    averageOrderValue,
+    refundRequests: refunds.length,
+    pendingReviews: reviews.filter((review) => review.status === "pending").length,
+    topCountries: settings.supportedCountries.slice(0, 4)
   };
 }
 

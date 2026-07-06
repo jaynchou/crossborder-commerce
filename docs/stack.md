@@ -28,11 +28,19 @@ Admin pages:
 
 - `/admin` - dashboard and metrics
 - `/admin/products` - products
+- `/admin/products/new` - add product, upload images, price, inventory, shipping, SEO
+- `/admin/media` - product media library
 - `/admin/categories` - categories
+- `/admin/attributes` - product attributes
+- `/admin/variants` - product variants
 - `/admin/orders` - orders
 - `/admin/customers` - customers
 - `/admin/inventory` - inventory
 - `/admin/coupons` - coupons
+- `/admin/payments` - payment methods
+- `/admin/refunds` - refunds and after-sales
+- `/admin/reviews` - product review moderation
+- `/admin/reports` - sales and operations reports
 - `/admin/tax` - tax
 - `/admin/shipping` - shipping
 - `/admin/fulfillment` - fulfillment
@@ -85,13 +93,21 @@ Backend source files:
 The project now has local pages for the necessary ecommerce management areas:
 
 - Products and product catalog
+- Product creation and draft fields
+- Product image/media upload flow
 - Categories
+- Attributes
+- Variants
 - Cart
 - Checkout
 - Orders
 - Customers
 - Inventory and stock reservations
 - Coupons
+- Payments
+- Refunds
+- Reviews
+- Reports
 - Tax settings
 - Shipping zones and rates
 - Fulfillment and tracking

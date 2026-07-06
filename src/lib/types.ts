@@ -19,6 +19,35 @@ export type Product = {
   status: "active" | "draft";
 };
 
+export type ProductAttribute = {
+  id: string;
+  name: string;
+  values: string[];
+  visible: boolean;
+  variation: boolean;
+};
+
+export type ProductVariant = {
+  id: string;
+  productId: string;
+  sku: string;
+  attributes: Record<string, string>;
+  price: number;
+  stock: number;
+  weightGrams: number;
+  image?: string;
+};
+
+export type MediaAsset = {
+  id: string;
+  fileName: string;
+  url: string;
+  type: "image" | "video";
+  alt: string;
+  sizeKb: number;
+  usedBy: string[];
+};
+
 export type CartItem = {
   productId: string;
   quantity: number;
@@ -95,4 +124,30 @@ export type StoreSettings = {
   defaultCurrency: string;
   supportedCountries: string[];
   taxRate: number;
+};
+
+export type PaymentMethod = {
+  id: string;
+  name: string;
+  provider: "stripe" | "paypal" | "manual";
+  enabled: boolean;
+  currencies: string[];
+};
+
+export type Refund = {
+  id: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  reason: string;
+  status: "requested" | "approved" | "rejected" | "paid";
+};
+
+export type Review = {
+  id: string;
+  productId: string;
+  customerName: string;
+  rating: number;
+  status: "pending" | "approved" | "spam";
+  body: string;
 };

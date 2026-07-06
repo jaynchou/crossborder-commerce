@@ -24,11 +24,19 @@ Admin:
 
 - `/admin` - dashboard and metrics
 - `/admin/products` - products
+- `/admin/products/new` - add product
+- `/admin/media` - media
 - `/admin/categories` - categories
+- `/admin/attributes` - attributes
+- `/admin/variants` - variants
 - `/admin/orders` - orders
 - `/admin/customers` - customers
 - `/admin/inventory` - inventory
 - `/admin/coupons` - coupons
+- `/admin/payments` - payments
+- `/admin/refunds` - refunds
+- `/admin/reviews` - reviews
+- `/admin/reports` - reports
 - `/admin/tax` - tax
 - `/admin/shipping` - shipping
 - `/admin/fulfillment` - fulfillment
