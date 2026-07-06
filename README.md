@@ -10,6 +10,30 @@ A portable cross-border ecommerce starter. It is intentionally product-agnostic:
 - Vercel deployment
 - Docker and Docker Compose for migration to any cloud server
 
+For the full frontend, backend, and environment explanation, see `docs/stack.md`.
+
+## Local Pages
+
+Storefront:
+
+- `/` - storefront and product catalog preview
+- `/cart` - cart
+- `/checkout` - checkout
+
+Admin:
+
+- `/admin` - dashboard and metrics
+- `/admin/products` - products
+- `/admin/categories` - categories
+- `/admin/orders` - orders
+- `/admin/customers` - customers
+- `/admin/inventory` - inventory
+- `/admin/coupons` - coupons
+- `/admin/tax` - tax
+- `/admin/shipping` - shipping
+- `/admin/fulfillment` - fulfillment
+- `/admin/settings` - settings
+
 ## Local Development
 
 ```bash

@@ -1,0 +1,43 @@
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+const navItems = [
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/products", label: "Products" },
+  { href: "/admin/categories", label: "Categories" },
+  { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/customers", label: "Customers" },
+  { href: "/admin/inventory", label: "Inventory" },
+  { href: "/admin/coupons", label: "Coupons" },
+  { href: "/admin/tax", label: "Tax" },
+  { href: "/admin/shipping", label: "Shipping" },
+  { href: "/admin/fulfillment", label: "Fulfillment" },
+  { href: "/admin/settings", label: "Settings" },
+  { href: "/", label: "Storefront" }
+];
+
+type AdminLayoutProps = {
+  eyebrow?: string;
+  title: string;
+  children: ReactNode;
+};
+
+export function AdminLayout({ eyebrow = "Commerce admin", title, children }: AdminLayoutProps) {
+  return (
+    <main className="adminShell">
+      <aside className="sidebar">
+        <strong>CrossBorder Admin</strong>
+        {navItems.map((item) => (
+          <Link href={item.href} key={item.href}>{item.label}</Link>
+        ))}
+      </aside>
+      <section className="adminMain">
+        <div className="adminHeader">
+          <p className="eyebrow">{eyebrow}</p>
+          <h1>{title}</h1>
+        </div>
+        {children}
+      </section>
+    </main>
+  );
+}

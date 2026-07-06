@@ -28,7 +28,8 @@ export default function StorefrontPage() {
           <strong>{process.env.NEXT_PUBLIC_STORE_NAME ?? "CrossBorder Commerce"}</strong>
           <div>
             <a href="#products">Products</a>
-            <a href="#checkout">Checkout</a>
+            <Link href="/cart">Cart</Link>
+            <Link href="/checkout">Checkout</Link>
             <Link href="/admin">Admin</Link>
           </div>
         </nav>
@@ -41,6 +42,7 @@ export default function StorefrontPage() {
           </p>
           <div className="actions">
             <a className="primaryButton" href="#products">Browse catalog</a>
+            <Link className="secondaryButton" href="/cart">View cart</Link>
             <Link className="secondaryButton" href="/admin">Open admin</Link>
           </div>
         </div>

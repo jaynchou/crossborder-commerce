@@ -153,6 +153,18 @@ export function listCategories() {
   return Array.from(new Set(products.map((product) => product.category))).sort();
 }
 
+export function listCategoryStats() {
+  return listCategories().map((category) => {
+    const categoryProducts = products.filter((product) => product.category === category);
+    return {
+      name: category,
+      products: categoryProducts.length,
+      active: categoryProducts.filter((product) => product.status === "active").length,
+      stock: categoryProducts.reduce((sum, product) => sum + product.stock, 0)
+    };
+  });
+}
+
 export function getProduct(id: string) {
   return products.find((product) => product.id === id);
 }
