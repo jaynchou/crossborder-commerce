@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/AdminLayout";
+import { FulfillmentForm } from "@/components/FulfillmentForm";
 import { listOrders } from "@/lib/store";
 
 export default function FulfillmentPage() {
@@ -15,6 +16,7 @@ export default function FulfillmentPage() {
               <span>{order.fulfillmentStatus}</span>
               <span>{order.trackingNumber ?? "No tracking yet"}</span>
               <span>{order.customer.city}, {order.customer.country}</span>
+              <FulfillmentForm orderId={order.id} />
             </div>
           ))}
         </div>

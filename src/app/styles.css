@@ -115,6 +115,19 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.darkSecondary {
+  display: inline-flex;
+  justify-content: center;
+  background: var(--paper);
+  color: var(--brand-strong);
+  border-color: var(--line);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
 .simplePage {
   min-height: 100vh;
 }
@@ -360,6 +373,18 @@ button {
   gap: 16px;
 }
 
+.actionsInline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ghostButton {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--brand-strong);
+}
+
 .table {
   display: grid;
   gap: 8px;
@@ -398,9 +423,12 @@ button {
   grid-template-columns: 1.3fr 1fr 1fr 1fr 1fr;
 }
 
-.customerRow,
-.fulfillmentRow {
+.customerRow {
   grid-template-columns: 1fr 1.5fr 1fr 1fr;
+}
+
+.fulfillmentRow {
+  grid-template-columns: 1fr 1fr 1fr 1.1fr minmax(320px, 1.6fr);
 }
 
 .adminCards {
@@ -574,6 +602,76 @@ button {
 .statusText {
   margin: 14px 0 0;
   color: var(--muted);
+}
+
+.cartOptions {
+  margin-top: 22px;
+}
+
+.quantityControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.quantityControl input {
+  width: 76px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px;
+  color: var(--ink);
+  background: #fbfcfa;
+}
+
+.emptyState {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  margin-top: 16px;
+  padding: 24px;
+  background: #fbfcfa;
+}
+
+.emptyState p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.successBox {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #b9d7c7;
+  border-radius: 8px;
+  padding: 14px;
+  background: #eef8f2;
+  color: var(--brand-strong);
+}
+
+.fulfillmentForm {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(110px, 0.9fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.fulfillmentForm input {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  color: var(--ink);
+  background: #fbfcfa;
+}
+
+.fulfillmentForm button {
+  padding: 10px 12px;
+}
+
+.fulfillmentForm span {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .attributeRow,

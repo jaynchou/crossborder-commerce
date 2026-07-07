@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./styles.css";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "CrossBorder Commerce",
   description: "A portable cross-border commerce platform starter"

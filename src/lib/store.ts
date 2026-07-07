@@ -15,187 +15,217 @@ import type {
   StoreSettings
 } from "./types";
 
-const settings: StoreSettings = {
-  name: "CrossBorder Commerce",
-  defaultCurrency: "USD",
-  supportedCountries: ["US", "CA", "GB", "AU", "SG", "JP"],
-  taxRate: 0.07
+type StoreState = {
+  settings: StoreSettings;
+  products: Product[];
+  coupons: Coupon[];
+  productAttributes: ProductAttribute[];
+  productVariants: ProductVariant[];
+  mediaAssets: MediaAsset[];
+  shippingRates: ShippingRate[];
+  customers: Customer[];
+  paymentMethods: PaymentMethod[];
+  orders: Order[];
+  refunds: Refund[];
+  reviews: Review[];
 };
 
-const products: Product[] = [
-  {
-    id: "album-cloud-001",
-    sku: "CB-SCARF-001",
-    title: "Merino Travel Scarf",
-    subtitle: "Lightweight warmth for global shipping",
-    description: "Soft merino blend scarf prepared for cross-border gifting and cold-weather travel.",
-    price: 39,
-    currency: "USD",
-    originalPrice: 59,
-    category: "Apparel",
-    originCountry: "CN",
-    shipFrom: "CN-SZX",
-    weightGrams: 320,
-    stock: 86,
-    reserved: 2,
-    images: ["/products/scarf.svg"],
-    tags: ["Giftable", "Winter"],
-    featured: true,
-    status: "active"
-  },
-  {
-    id: "album-tea-002",
-    sku: "CB-TEA-002",
-    title: "Cold Brew Tea Set",
-    subtitle: "Shelf-stable starter product",
-    description: "A lightweight tea set with clear customs attributes and strong margin potential.",
-    price: 24,
-    currency: "USD",
-    originalPrice: 32,
-    category: "Food & Beverage",
-    originCountry: "CN",
-    shipFrom: "CN-HGH",
-    weightGrams: 540,
-    stock: 120,
-    reserved: 0,
-    images: ["/products/tea.svg"],
-    tags: ["New", "Lightweight"],
-    featured: true,
-    status: "active"
-  },
-  {
-    id: "album-bag-003",
-    sku: "CB-BAG-003",
-    title: "Packable Daily Tote",
-    subtitle: "Low-risk lifestyle SKU",
-    description: "Water-resistant tote with simple variants and easy fulfillment.",
-    price: 45,
-    currency: "USD",
-    category: "Bags",
-    originCountry: "VN",
-    shipFrom: "CN-SZX",
-    weightGrams: 780,
-    stock: 42,
-    reserved: 6,
-    images: ["/products/bag.svg"],
-    tags: ["Travel", "In stock"],
-    featured: true,
-    status: "active"
-  }
-];
+declare global {
+  // Keeps the in-memory repository coherent across Next.js route/page module instances.
+  // eslint-disable-next-line no-var
+  var __crossborderStore: StoreState | undefined;
+}
 
-const coupons: Coupon[] = [
-  { code: "LAUNCH10", type: "percentage", value: 10, active: true, minSubtotal: 30 },
-  { code: "FREESHIP", type: "fixed", value: 8, active: true, minSubtotal: 60 }
-];
+const store = globalThis.__crossborderStore ??= createInitialStore();
+const {
+  settings,
+  products,
+  coupons,
+  productAttributes,
+  productVariants,
+  mediaAssets,
+  shippingRates,
+  customers,
+  paymentMethods,
+  orders,
+  refunds,
+  reviews
+} = store;
 
-const productAttributes: ProductAttribute[] = [
-  { id: "attr-color", name: "Color", values: ["Stone", "Sage", "Black"], visible: true, variation: true },
-  { id: "attr-size", name: "Size", values: ["S", "M", "L"], visible: true, variation: true },
-  { id: "attr-material", name: "Material", values: ["Merino blend", "Canvas", "Tea leaves"], visible: true, variation: false }
-];
-
-const productVariants: ProductVariant[] = [
-  {
-    id: "var-scarf-stone",
-    productId: "album-cloud-001",
-    sku: "CB-SCARF-001-STONE",
-    attributes: { Color: "Stone", Size: "M" },
-    price: 39,
-    stock: 32,
-    weightGrams: 320,
-    image: "/products/scarf.svg"
-  },
-  {
-    id: "var-bag-black",
-    productId: "album-bag-003",
-    sku: "CB-BAG-003-BLK",
-    attributes: { Color: "Black" },
-    price: 45,
-    stock: 18,
-    weightGrams: 780,
-    image: "/products/bag.svg"
-  }
-];
-
-const mediaAssets: MediaAsset[] = [
-  { id: "media-scarf", fileName: "scarf.svg", url: "/products/scarf.svg", type: "image", alt: "Merino Travel Scarf", sizeKb: 2, usedBy: ["CB-SCARF-001"] },
-  { id: "media-tea", fileName: "tea.svg", url: "/products/tea.svg", type: "image", alt: "Cold Brew Tea Set", sizeKb: 2, usedBy: ["CB-TEA-002"] },
-  { id: "media-bag", fileName: "bag.svg", url: "/products/bag.svg", type: "image", alt: "Packable Daily Tote", sizeKb: 2, usedBy: ["CB-BAG-003"] }
-];
-
-const shippingRates: ShippingRate[] = [
-  {
-    id: "standard-global",
-    name: "Standard Global",
-    countries: ["US", "CA", "GB", "AU", "SG", "JP"],
-    basePrice: 8,
-    perKgPrice: 4,
-    etaDays: "7-14"
-  },
-  {
-    id: "priority-global",
-    name: "Priority Global",
-    countries: ["US", "CA", "GB", "AU", "SG", "JP"],
-    basePrice: 18,
-    perKgPrice: 7,
-    etaDays: "4-8"
-  }
-];
-
-const customers: Customer[] = [
-  {
-    id: "cus_demo_001",
-    name: "Demo Buyer",
-    email: "buyer@example.com",
-    phone: "+1 555 0100",
-    country: "US",
-    createdAt: new Date().toISOString()
-  }
-];
-
-const paymentMethods: PaymentMethod[] = [
-  { id: "pay-stripe", name: "Credit card", provider: "stripe", enabled: false, currencies: ["USD", "EUR", "GBP"] },
-  { id: "pay-paypal", name: "PayPal", provider: "paypal", enabled: false, currencies: ["USD", "EUR", "GBP"] },
-  { id: "pay-manual", name: "Manual test payment", provider: "manual", enabled: true, currencies: ["USD"] }
-];
-
-const orders: Order[] = [
-  {
-    id: "CB20260706001",
-    customerId: "cus_demo_001",
-    customer: {
-      name: "Demo Buyer",
-      phone: "+1 555 0100",
-      email: "buyer@example.com",
-      country: "US",
-      province: "CA",
-      city: "Los Angeles",
-      line1: "88 Demo Street",
-      postalCode: "90001"
+function createInitialStore(): StoreState {
+  return {
+    settings: {
+      name: "CrossBorder Commerce",
+      defaultCurrency: "USD",
+      supportedCountries: ["US", "CA", "GB", "AU", "SG", "JP"],
+      taxRate: 0.07
     },
-    items: [{ productId: "album-cloud-001", quantity: 1 }],
-    subtotal: 39,
-    discount: 0,
-    shipping: 10,
-    tax: 2.73,
-    total: 51.73,
-    currency: "USD",
-    status: "paid",
-    paymentStatus: "paid",
-    fulfillmentStatus: "unfulfilled",
-    createdAt: new Date().toISOString()
-  }
-];
-
-const refunds: Refund[] = [
-  { id: "ref_demo_001", orderId: "CB20260706001", amount: 12, currency: "USD", reason: "Partial shipping adjustment", status: "requested" }
-];
-
-const reviews: Review[] = [
-  { id: "rev_demo_001", productId: "album-cloud-001", customerName: "Demo Buyer", rating: 5, status: "approved", body: "Soft and easy to gift." },
-  { id: "rev_demo_002", productId: "album-tea-002", customerName: "Wholesale Tester", rating: 4, status: "pending", body: "Good starter SKU, needs stronger packaging." }
-];
+    products: [
+      {
+        id: "album-cloud-001",
+        sku: "CB-SCARF-001",
+        title: "Merino Travel Scarf",
+        subtitle: "Lightweight warmth for global shipping",
+        description: "Soft merino blend scarf prepared for cross-border gifting and cold-weather travel.",
+        price: 39,
+        currency: "USD",
+        originalPrice: 59,
+        category: "Apparel",
+        originCountry: "CN",
+        shipFrom: "CN-SZX",
+        weightGrams: 320,
+        stock: 86,
+        reserved: 2,
+        images: ["/products/scarf.svg"],
+        tags: ["Giftable", "Winter"],
+        featured: true,
+        status: "active"
+      },
+      {
+        id: "album-tea-002",
+        sku: "CB-TEA-002",
+        title: "Cold Brew Tea Set",
+        subtitle: "Shelf-stable starter product",
+        description: "A lightweight tea set with clear customs attributes and strong margin potential.",
+        price: 24,
+        currency: "USD",
+        originalPrice: 32,
+        category: "Food & Beverage",
+        originCountry: "CN",
+        shipFrom: "CN-HGH",
+        weightGrams: 540,
+        stock: 120,
+        reserved: 0,
+        images: ["/products/tea.svg"],
+        tags: ["New", "Lightweight"],
+        featured: true,
+        status: "active"
+      },
+      {
+        id: "album-bag-003",
+        sku: "CB-BAG-003",
+        title: "Packable Daily Tote",
+        subtitle: "Low-risk lifestyle SKU",
+        description: "Water-resistant tote with simple variants and easy fulfillment.",
+        price: 45,
+        currency: "USD",
+        category: "Bags",
+        originCountry: "VN",
+        shipFrom: "CN-SZX",
+        weightGrams: 780,
+        stock: 42,
+        reserved: 6,
+        images: ["/products/bag.svg"],
+        tags: ["Travel", "In stock"],
+        featured: true,
+        status: "active"
+      }
+    ],
+    coupons: [
+      { code: "LAUNCH10", type: "percentage", value: 10, active: true, minSubtotal: 30 },
+      { code: "FREESHIP", type: "fixed", value: 8, active: true, minSubtotal: 60 }
+    ],
+    productAttributes: [
+      { id: "attr-color", name: "Color", values: ["Stone", "Sage", "Black"], visible: true, variation: true },
+      { id: "attr-size", name: "Size", values: ["S", "M", "L"], visible: true, variation: true },
+      { id: "attr-material", name: "Material", values: ["Merino blend", "Canvas", "Tea leaves"], visible: true, variation: false }
+    ],
+    productVariants: [
+      {
+        id: "var-scarf-stone",
+        productId: "album-cloud-001",
+        sku: "CB-SCARF-001-STONE",
+        attributes: { Color: "Stone", Size: "M" },
+        price: 39,
+        stock: 32,
+        weightGrams: 320,
+        image: "/products/scarf.svg"
+      },
+      {
+        id: "var-bag-black",
+        productId: "album-bag-003",
+        sku: "CB-BAG-003-BLK",
+        attributes: { Color: "Black" },
+        price: 45,
+        stock: 18,
+        weightGrams: 780,
+        image: "/products/bag.svg"
+      }
+    ],
+    mediaAssets: [
+      { id: "media-scarf", fileName: "scarf.svg", url: "/products/scarf.svg", type: "image", alt: "Merino Travel Scarf", sizeKb: 2, usedBy: ["CB-SCARF-001"] },
+      { id: "media-tea", fileName: "tea.svg", url: "/products/tea.svg", type: "image", alt: "Cold Brew Tea Set", sizeKb: 2, usedBy: ["CB-TEA-002"] },
+      { id: "media-bag", fileName: "bag.svg", url: "/products/bag.svg", type: "image", alt: "Packable Daily Tote", sizeKb: 2, usedBy: ["CB-BAG-003"] }
+    ],
+    shippingRates: [
+      {
+        id: "standard-global",
+        name: "Standard Global",
+        countries: ["US", "CA", "GB", "AU", "SG", "JP"],
+        basePrice: 8,
+        perKgPrice: 4,
+        etaDays: "7-14"
+      },
+      {
+        id: "priority-global",
+        name: "Priority Global",
+        countries: ["US", "CA", "GB", "AU", "SG", "JP"],
+        basePrice: 18,
+        perKgPrice: 7,
+        etaDays: "4-8"
+      }
+    ],
+    customers: [
+      {
+        id: "cus_demo_001",
+        name: "Demo Buyer",
+        email: "buyer@example.com",
+        phone: "+1 555 0100",
+        country: "US",
+        createdAt: new Date().toISOString()
+      }
+    ],
+    paymentMethods: [
+      { id: "pay-stripe", name: "Credit card", provider: "stripe", enabled: false, currencies: ["USD", "EUR", "GBP"] },
+      { id: "pay-paypal", name: "PayPal", provider: "paypal", enabled: false, currencies: ["USD", "EUR", "GBP"] },
+      { id: "pay-manual", name: "Manual test payment", provider: "manual", enabled: true, currencies: ["USD"] }
+    ],
+    orders: [
+      {
+        id: "CB20260706001",
+        customerId: "cus_demo_001",
+        customer: {
+          name: "Demo Buyer",
+          phone: "+1 555 0100",
+          email: "buyer@example.com",
+          country: "US",
+          province: "CA",
+          city: "Los Angeles",
+          line1: "88 Demo Street",
+          postalCode: "90001"
+        },
+        items: [{ productId: "album-cloud-001", quantity: 1 }],
+        subtotal: 39,
+        discount: 0,
+        shipping: 10,
+        tax: 2.73,
+        total: 51.73,
+        currency: "USD",
+        status: "paid",
+        paymentStatus: "paid",
+        fulfillmentStatus: "unfulfilled",
+        createdAt: new Date().toISOString()
+      }
+    ],
+    refunds: [
+      { id: "ref_demo_001", orderId: "CB20260706001", amount: 12, currency: "USD", reason: "Partial shipping adjustment", status: "requested" }
+    ],
+    reviews: [
+      { id: "rev_demo_001", productId: "album-cloud-001", customerName: "Demo Buyer", rating: 5, status: "approved", body: "Soft and easy to gift." },
+      { id: "rev_demo_002", productId: "album-tea-002", customerName: "Wholesale Tester", rating: 4, status: "pending", body: "Good starter SKU, needs stronger packaging." }
+    ]
+  };
+}
 
 export function listProducts() {
   return products.filter((product) => product.status === "active");
@@ -396,7 +426,7 @@ export function getMetrics() {
 
 export function getReports() {
   const revenue = orders.reduce((sum, order) => sum + order.total, 0);
-  const units = orders.reduce((sum, order) => sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0);
+  const units = orders.reduce((sum, order) => order.items.reduce((itemSum, item) => itemSum + item.quantity, sum), 0);
   const averageOrderValue = orders.length ? roundMoney(revenue / orders.length) : 0;
 
   return {
