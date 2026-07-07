@@ -1,5 +1,5 @@
 import { AdminLayout } from "@/components/AdminLayout";
-import { listReviews } from "@/lib/store";
+import { getProduct, listReviews } from "@/lib/store";
 
 export default function ReviewsPage() {
   const reviews = listReviews();
@@ -12,9 +12,10 @@ export default function ReviewsPage() {
           {reviews.map((review) => (
             <div className="tableRow reviewRow" key={review.id}>
               <span>{review.customerName}</span>
-              <span>{review.productId}</span>
+              <span>{getProduct(review.productId)?.title ?? review.productId}</span>
               <span>{review.rating} stars</span>
               <span>{review.status}</span>
+              <span>{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "No date"}</span>
               <span>{review.body}</span>
             </div>
           ))}

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { money } from "@/components/Money";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import { addStoredCartItem, readStoredCart } from "@/components/cartStorage";
-import type { CartItem, Coupon, Product, ShippingRate } from "@/lib/types";
+import type { CartItem, Coupon, Product, ShippingRate, StoreSettings } from "@/lib/types";
 
 type QuoteItem = CartItem & {
   product: Product;
@@ -36,6 +38,7 @@ type StorefrontClientProps = {
   coupons: Coupon[];
   shippingRates: ShippingRate[];
   initialQuote: CartQuote;
+  settings: StoreSettings;
 };
 
 const categoryVisuals = [
@@ -51,7 +54,8 @@ export function StorefrontClient({
   categories,
   coupons,
   shippingRates,
-  initialQuote
+  initialQuote,
+  settings
 }: StorefrontClientProps) {
   const featured = useMemo(() => products.filter((product) => product.featured), [products]);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -114,25 +118,14 @@ export function StorefrontClient({
         <span>30-day returns on test orders</span>
       </div>
 
-      <header className="storeHeader">
-        <Link className="brandLockup" href="/">
-          <strong>{storeName}</strong>
-          <span>Global lifestyle commerce</span>
-        </Link>
-        <nav className="storeNav" aria-label="Store navigation">
-          <a href="#new">New In</a>
-          {categories.map((category) => (
-            <a href="#products" key={category}>{category}</a>
-          ))}
-          <a href="#sale">Sale</a>
-        </nav>
-        <div className="storeActions">
-          <Link href="/admin">Admin</Link>
-          <button className="cartLink" type="button" onClick={() => setIsCartOpen(true)}>
-            Cart ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
-          </button>
-        </div>
-      </header>
+      <SiteHeader
+        storeName={storeName}
+        categories={categories}
+        featuredProducts={featured}
+        coupons={coupons}
+        cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+        onCartClick={() => setIsCartOpen(true)}
+      />
 
       {isCartOpen ? (
         <div className="flyCartLayer" role="presentation">
@@ -143,7 +136,7 @@ export function StorefrontClient({
                 <span className="microLabel">Shopping bag</span>
                 <h2>Your Cart</h2>
               </div>
-              <button className="iconButton" aria-label="Close cart" type="button" onClick={() => setIsCartOpen(false)}>×</button>
+              <button className="iconButton" aria-label="Close cart" type="button" onClick={() => setIsCartOpen(false)}>X</button>
             </div>
             {quote.items.length ? (
               <div className="flyCartItems">
@@ -294,30 +287,7 @@ export function StorefrontClient({
         </div>
       </section>
 
-      <footer className="storeFooter">
-        <div>
-          <strong>{storeName}</strong>
-          <p>Curated fashion and lifestyle essentials, delivered worldwide.</p>
-        </div>
-        <div>
-          <h3>Customer care</h3>
-          <span>Shipping & delivery</span>
-          <span>Returns & exchanges</span>
-          <span>Track your order</span>
-        </div>
-        <div>
-          <h3>Promotions</h3>
-          {coupons.map((coupon) => (
-            <span key={coupon.code}>{coupon.code}: {coupon.type === "percentage" ? `${coupon.value}% off` : `${money(coupon.value)} off`}</span>
-          ))}
-        </div>
-        <div>
-          <h3>Shipping</h3>
-          {shippingRates.map((rate) => (
-            <span key={rate.id}>{rate.name}: {rate.etaDays} days</span>
-          ))}
-        </div>
-      </footer>
+      <SiteFooter settings={settings} coupons={coupons} shippingRates={shippingRates} />
     </main>
   );
 }

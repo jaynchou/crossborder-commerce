@@ -73,3 +73,25 @@ export const fulfillmentSchema = z.object({
   orderId: z.string().min(1),
   trackingNumber: z.string().min(4)
 });
+
+export const settingsSchema = z.object({
+  name: z.string().min(2),
+  defaultCurrency: z.string().length(3).transform((value) => value.toUpperCase()),
+  supportedCountries: z.array(z.string().length(2).transform((value) => value.toUpperCase())).min(1),
+  taxRate: z.number().min(0).max(1)
+});
+
+export const reviewSchema = z.object({
+  productId: z.string().min(1),
+  customerName: z.string().min(2).max(80),
+  rating: z.number().int().min(1).max(5),
+  body: z.string().min(8).max(600)
+});
+
+export const couponSchema = z.object({
+  code: z.string().min(2).max(32).transform((value) => value.toUpperCase()),
+  type: z.enum(["percentage", "fixed"]),
+  value: z.number().positive(),
+  active: z.boolean().default(true),
+  minSubtotal: z.number().nonnegative().optional()
+});

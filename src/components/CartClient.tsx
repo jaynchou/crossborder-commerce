@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { money } from "@/components/Money";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import { clearStoredCart, readStoredCart, writeStoredCart } from "@/components/cartStorage";
-import type { CartItem, Coupon, Product, ShippingRate } from "@/lib/types";
+import type { CartItem, Coupon, Product, ShippingRate, StoreSettings } from "@/lib/types";
 
 type QuoteItem = CartItem & {
   product: Product;
@@ -31,11 +33,14 @@ type ApiResult<T> = {
 
 type CartClientProps = {
   products: Product[];
+  categories: string[];
+  coupons: Coupon[];
   countries: string[];
   shippingRates: ShippingRate[];
+  settings: StoreSettings;
 };
 
-export function CartClient({ products, countries, shippingRates }: CartClientProps) {
+export function CartClient({ products, categories, coupons, countries, shippingRates, settings }: CartClientProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [country, setCountry] = useState(countries[0] ?? "US");
   const [couponCode, setCouponCode] = useState("LAUNCH10");
@@ -110,17 +115,13 @@ export function CartClient({ products, countries, shippingRates }: CartClientPro
         <span>Free shipping $79+</span>
         <span>LAUNCH10 applies automatically when eligible</span>
       </div>
-      <header className="storeHeader">
-        <Link className="brandLockup" href="/">
-          <strong>CrossBorder Commerce</strong>
-          <span>Global lifestyle commerce</span>
-        </Link>
-        <nav className="storeNav" aria-label="Cart navigation">
-          <Link href="/">Continue shopping</Link>
-          <Link href="/checkout">Checkout</Link>
-          <Link href="/admin">Admin</Link>
-        </nav>
-      </header>
+      <SiteHeader
+        storeName={settings.name}
+        categories={categories}
+        featuredProducts={products}
+        coupons={coupons}
+        cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+      />
 
       <section className="flowHero">
         <div>
@@ -239,6 +240,7 @@ export function CartClient({ products, countries, shippingRates }: CartClientPro
           </div>
         </aside>
       </section>
+      <SiteFooter settings={settings} coupons={coupons} shippingRates={shippingRates} />
     </main>
   );
 }

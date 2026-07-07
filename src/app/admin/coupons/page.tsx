@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/AdminLayout";
+import { CouponCreateForm } from "@/components/CouponCreateForm";
 import { listCoupons } from "@/lib/store";
 
 export default function CouponsPage() {
@@ -9,7 +10,6 @@ export default function CouponsPage() {
       <section className="panel">
         <div className="panelHeader">
           <h2>Promotion codes</h2>
-          <button>Add coupon</button>
         </div>
         <div className="table">
           {coupons.map((coupon) => (
@@ -23,6 +23,7 @@ export default function CouponsPage() {
           ))}
         </div>
       </section>
+      <CouponCreateForm />
     </AdminLayout>
   );
 }

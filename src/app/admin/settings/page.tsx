@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/AdminLayout";
+import { SettingsForm } from "@/components/SettingsForm";
 import { getSettings } from "@/lib/store";
 
 export default function SettingsPage() {
@@ -23,6 +24,7 @@ export default function SettingsPage() {
           </div>
         </div>
       </section>
+      <SettingsForm settings={settings} />
     </AdminLayout>
   );
 }

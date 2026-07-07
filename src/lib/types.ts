@@ -150,4 +150,5 @@ export type Review = {
   rating: number;
   status: "pending" | "approved" | "spam";
   body: string;
+  createdAt?: string;
 };

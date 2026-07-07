@@ -1,6 +1,7 @@
 import { StorefrontClient } from "@/components/StorefrontClient";
 import {
   calculateCart,
+  getSettings,
   listCategories,
   listCoupons,
   listProducts,
@@ -12,6 +13,7 @@ export default function StorefrontPage() {
   const categories = listCategories();
   const coupons = listCoupons();
   const shippingRates = listShippingRates("US");
+  const settings = getSettings();
   const quote = calculateCart(
     [
       { productId: "album-cloud-001", quantity: 1 },
@@ -28,6 +30,7 @@ export default function StorefrontPage() {
       coupons={coupons}
       shippingRates={shippingRates}
       initialQuote={quote}
+      settings={settings}
     />
   );
 }

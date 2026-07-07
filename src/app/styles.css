@@ -687,6 +687,10 @@ button:disabled {
   grid-template-columns: 1fr 1.6fr 0.8fr 1.2fr 1fr;
 }
 
+.reviewRow {
+  grid-template-columns: 1fr 1.4fr 0.6fr 0.8fr 0.8fr 1.8fr;
+}
+
 @media (max-width: 820px) {
   .grid,
   .metricGrid,
@@ -717,10 +721,31 @@ button:disabled {
 
   .sidebar {
     position: static;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 14px 16px;
+  }
+
+  .sidebar strong {
+    flex: 0 0 auto;
+    margin: 0 10px 0 0;
+    white-space: nowrap;
+  }
+
+  .sidebar a {
+    flex: 0 0 auto;
+    min-height: 34px;
+    white-space: nowrap;
+  }
+
+  .adminMain {
+    padding: 24px 16px;
   }
 
   .tableRow {
     grid-template-columns: 1fr;
+    min-width: 0;
   }
 }
 
@@ -787,6 +812,64 @@ button:disabled {
 
 .storeActions {
   justify-content: flex-end;
+}
+
+.megaNavItem {
+  position: relative;
+}
+
+.megaMenu {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 18px);
+  z-index: 40;
+  display: none;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(260px, 1.2fr) minmax(190px, 0.8fr);
+  gap: 22px;
+  width: min(760px, calc(100vw - 48px));
+  border: 1px solid #e5e0d8;
+  border-radius: 8px;
+  padding: 22px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(20, 20, 20, 0.12);
+  transform: translateX(-50%);
+}
+
+.megaNavItem:hover .megaMenu,
+.megaNavItem:focus-within .megaMenu {
+  display: grid;
+}
+
+.megaMenu > div {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.megaProduct {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.megaProduct img {
+  width: 52px;
+  height: 58px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #eef4eb;
+}
+
+.promoPill {
+  display: inline-flex;
+  width: fit-content;
+  border: 1px solid #d8e5d8;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: #f4faf5;
+  color: #315f43;
+  font-weight: 800;
 }
 
 .cartLink,
@@ -1251,7 +1334,31 @@ button:disabled {
   font-size: 14px;
 }
 
+.storeFooter a {
+  color: #65635f;
+  font-size: 13px;
+}
+
 /* Product detail */
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 18px clamp(20px, 5vw, 64px) 0;
+  color: #65635f;
+  font-size: 13px;
+}
+
+.breadcrumbs span:not(:last-child)::after {
+  content: "/";
+  margin-left: 8px;
+  color: #aaa39a;
+}
+
+.breadcrumbs strong {
+  color: #151515;
+}
+
 .productDetailShell {
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(340px, 0.82fr);
@@ -1315,6 +1422,35 @@ button:disabled {
 
 .productPrice strong {
   font-size: 32px;
+}
+
+.discountBadge {
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #e6f2cb;
+  color: #315f43;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.promoStack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.promoCard {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #d8e5d8;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f4faf5;
+}
+
+.promoCard span {
+  color: #65635f;
+  font-size: 13px;
 }
 
 .variantPanel,
@@ -1384,6 +1520,72 @@ button:disabled {
 
 .detailAccordion p {
   margin: 12px 0 0;
+}
+
+.reviewsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.reviewList {
+  display: grid;
+  gap: 14px;
+}
+
+.reviewCard,
+.reviewForm {
+  border: 1px solid #e5e0d8;
+  border-radius: 8px;
+  padding: 18px;
+  background: #fff;
+}
+
+.reviewCard p {
+  margin: 12px 0 0;
+  color: #5e5c58;
+  line-height: 1.6;
+}
+
+.reviewForm {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 12px;
+}
+
+.reviewForm h3 {
+  margin: 0;
+}
+
+.reviewForm label {
+  display: grid;
+  gap: 8px;
+  color: #65635f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reviewForm input,
+.reviewForm select,
+.reviewForm textarea {
+  width: 100%;
+  border: 1px solid #d8d3cc;
+  border-radius: 6px;
+  padding: 12px;
+  background: #fff;
+  color: #151515;
+  font: inherit;
+}
+
+.reviewForm textarea {
+  min-height: 132px;
+  resize: vertical;
+}
+
+.compactProductShelf .retailProductImage {
+  min-height: 260px;
 }
 
 /* Cart and checkout flow */
@@ -1798,6 +2000,11 @@ button:disabled {
     overflow-x: auto;
   }
 
+  .megaMenu {
+    left: 0;
+    transform: none;
+  }
+
   .cartPreview {
     margin: 0 20px 24px;
   }
@@ -1810,7 +2017,8 @@ button:disabled {
 
   .productBuyBox,
   .orderSummaryCard,
-  .editorSideColumn {
+  .editorSideColumn,
+  .reviewForm {
     position: static;
   }
 }
@@ -1825,6 +2033,8 @@ button:disabled {
   .professionalForm,
   .professionalForm.twoColumns,
   .purchaseRow,
+  .promoStack,
+  .reviewsLayout,
   .storeFooter {
     grid-template-columns: 1fr;
   }
@@ -1853,5 +2063,20 @@ button:disabled {
 
   .linePrice {
     justify-items: start;
+  }
+
+  .promoBar,
+  .storeHeader,
+  .flowHero,
+  .cartLayout,
+  .checkoutLayout,
+  .productDetailShell,
+  .retailSection {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .adminHeader h1 {
+    font-size: 32px;
   }
 }

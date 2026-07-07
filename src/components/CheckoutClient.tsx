@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { money } from "@/components/Money";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import { clearStoredCart, readStoredCart } from "@/components/cartStorage";
 import type { Address, CartItem, Coupon, Product, ShippingRate, StoreSettings } from "@/lib/types";
 
@@ -38,10 +40,13 @@ type ApiResult<T> = {
 
 type CheckoutClientProps = {
   settings: StoreSettings;
+  categories: string[];
+  coupons: Coupon[];
+  products: Product[];
   shippingRates: ShippingRate[];
 };
 
-export function CheckoutClient({ settings, shippingRates }: CheckoutClientProps) {
+export function CheckoutClient({ settings, categories, coupons, products, shippingRates }: CheckoutClientProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [couponCode, setCouponCode] = useState("LAUNCH10");
   const [shippingRateId, setShippingRateId] = useState(shippingRates[0]?.id ?? "");
@@ -135,17 +140,13 @@ export function CheckoutClient({ settings, shippingRates }: CheckoutClientProps)
         <span>Encrypted checkout simulation</span>
         <span>Inventory reserve happens after order creation</span>
       </div>
-      <header className="storeHeader">
-        <Link className="brandLockup" href="/">
-          <strong>CrossBorder Commerce</strong>
-          <span>Global lifestyle commerce</span>
-        </Link>
-        <nav className="storeNav" aria-label="Checkout navigation">
-          <Link href="/">Storefront</Link>
-          <Link href="/cart">Cart</Link>
-          <Link href="/admin/orders">Orders</Link>
-        </nav>
-      </header>
+      <SiteHeader
+        storeName={settings.name}
+        categories={categories}
+        featuredProducts={products}
+        coupons={coupons}
+        cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+      />
 
       <section className="flowHero checkoutHero">
         <div>
@@ -252,10 +253,12 @@ export function CheckoutClient({ settings, shippingRates }: CheckoutClientProps)
             <div className="successBox">
               <strong>{order.id}</strong>
               <span>{money(order.total, order.currency)} | {order.status}</span>
+              <Link className="textLink" href="/admin/orders">Review in admin orders</Link>
             </div>
           ) : null}
         </aside>
       </section>
+      <SiteFooter settings={settings} coupons={coupons} shippingRates={shippingRates} />
     </main>
   );
 }

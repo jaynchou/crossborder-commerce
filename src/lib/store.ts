@@ -221,8 +221,24 @@ function createInitialStore(): StoreState {
       { id: "ref_demo_001", orderId: "CB20260706001", amount: 12, currency: "USD", reason: "Partial shipping adjustment", status: "requested" }
     ],
     reviews: [
-      { id: "rev_demo_001", productId: "album-cloud-001", customerName: "Demo Buyer", rating: 5, status: "approved", body: "Soft and easy to gift." },
-      { id: "rev_demo_002", productId: "album-tea-002", customerName: "Wholesale Tester", rating: 4, status: "pending", body: "Good starter SKU, needs stronger packaging." }
+      {
+        id: "rev_demo_001",
+        productId: "album-cloud-001",
+        customerName: "Demo Buyer",
+        rating: 5,
+        status: "approved",
+        body: "Soft and easy to gift.",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: "rev_demo_002",
+        productId: "album-tea-002",
+        customerName: "Wholesale Tester",
+        rating: 4,
+        status: "pending",
+        body: "Good starter SKU, needs stronger packaging.",
+        createdAt: new Date().toISOString()
+      }
     ]
   };
 }
@@ -298,6 +314,19 @@ export function listCoupons() {
   return coupons;
 }
 
+export function createCoupon(input: Coupon) {
+  if (coupons.some((coupon) => coupon.code.toUpperCase() === input.code.toUpperCase())) {
+    throw new Error("Coupon code already exists");
+  }
+
+  const coupon: Coupon = {
+    ...input,
+    code: input.code.toUpperCase()
+  };
+  coupons.unshift(coupon);
+  return coupon;
+}
+
 export function listPaymentMethods() {
   return paymentMethods;
 }
@@ -310,6 +339,28 @@ export function listReviews() {
   return reviews;
 }
 
+export function listProductReviews(productId: string, options?: { includePending?: boolean }) {
+  return reviews.filter((review) => {
+    if (review.productId !== productId) return false;
+    return options?.includePending ? review.status !== "spam" : review.status === "approved";
+  });
+}
+
+export function createReview(input: Pick<Review, "productId" | "customerName" | "rating" | "body">) {
+  if (!getProduct(input.productId)) {
+    throw new Error("Product not found");
+  }
+
+  const review: Review = {
+    ...input,
+    id: `rev_${Date.now()}`,
+    status: "pending",
+    createdAt: new Date().toISOString()
+  };
+  reviews.unshift(review);
+  return review;
+}
+
 export function validateCoupon(code: string, subtotal: number) {
   const coupon = coupons.find((item) => item.code.toUpperCase() === code.toUpperCase() && item.active);
   if (!coupon) return null;
@@ -320,6 +371,33 @@ export function validateCoupon(code: string, subtotal: number) {
 export function listShippingRates(country?: string) {
   if (!country) return shippingRates;
   return shippingRates.filter((rate) => rate.countries.includes(country));
+}
+
+export function listRelatedProducts(productId: string, limit = 4) {
+  const product = getProduct(productId);
+  if (!product) return [];
+
+  const scored = listProducts()
+    .filter((candidate) => candidate.id !== productId)
+    .map((candidate) => ({
+      product: candidate,
+      score:
+        (candidate.category === product.category ? 3 : 0) +
+        candidate.tags.filter((tag) => product.tags.includes(tag)).length +
+        (candidate.shipFrom === product.shipFrom ? 1 : 0)
+    }))
+    .sort((a, b) => b.score - a.score || a.product.price - b.product.price);
+
+  return scored.slice(0, limit).map((item) => item.product);
+}
+
+export function listActivePromotions(subtotal?: number) {
+  return coupons
+    .filter((coupon) => coupon.active)
+    .map((coupon) => ({
+      ...coupon,
+      eligible: subtotal === undefined || !coupon.minSubtotal || subtotal >= coupon.minSubtotal
+    }));
 }
 
 export function calculateCart(items: CartItem[], options?: { country?: string; couponCode?: string; shippingRateId?: string }) {
@@ -369,7 +447,9 @@ export function createOrder(input: { customer: Address; items: CartItem[]; coupo
     couponCode: input.couponCode,
     shippingRateId: input.shippingRateId
   });
+  const customer = upsertCustomer(input.customer);
   const order: Order = {
+    customerId: customer.id,
     customer: input.customer,
     items: input.items,
     id: `CB${Date.now()}`,
@@ -424,6 +504,14 @@ export function getSettings() {
   return settings;
 }
 
+export function updateSettings(input: Partial<StoreSettings>) {
+  if (input.name !== undefined) settings.name = input.name;
+  if (input.defaultCurrency !== undefined) settings.defaultCurrency = input.defaultCurrency;
+  if (input.supportedCountries !== undefined) settings.supportedCountries = input.supportedCountries;
+  if (input.taxRate !== undefined) settings.taxRate = input.taxRate;
+  return settings;
+}
+
 export function getMetrics() {
   const paidOrders = orders.filter((order) => order.status !== "cancelled");
   const revenue = paidOrders.reduce((sum, order) => sum + order.total, 0);
@@ -459,6 +547,29 @@ function reserveInventory(items: CartItem[]) {
       product.reserved += item.quantity;
     }
   }
+}
+
+function upsertCustomer(address: Address) {
+  const email = address.email?.toLowerCase();
+  const existing = email ? customers.find((customer) => customer.email.toLowerCase() === email) : undefined;
+
+  if (existing) {
+    existing.name = address.name;
+    existing.phone = address.phone;
+    existing.country = address.country;
+    return existing;
+  }
+
+  const customer: Customer = {
+    id: `cus_${Date.now()}`,
+    name: address.name,
+    email: email ?? `${Date.now()}@guest.local`,
+    phone: address.phone,
+    country: address.country,
+    createdAt: new Date().toISOString()
+  };
+  customers.unshift(customer);
+  return customer;
 }
 
 function roundMoney(value: number) {
