@@ -32,7 +32,10 @@ export default function ProductsPage() {
               <span>{money(product.price, product.currency)}</span>
               <span>{product.originCountry}</span>
               <span>{product.shipFrom}</span>
-              <span>{product.status}</span>
+              <span>
+                {product.status}
+                <Link className="textLink" href={`/admin/products/${product.id}`}>Edit</Link>
+              </span>
             </div>
           ))}
         </div>

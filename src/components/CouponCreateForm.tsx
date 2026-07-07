@@ -14,7 +14,6 @@ export function CouponCreateForm() {
   const [type, setType] = useState<Coupon["type"]>("percentage");
   const [value, setValue] = useState("15");
   const [minSubtotal, setMinSubtotal] = useState("50");
-  const [adminToken, setAdminToken] = useState("");
   const [message, setMessage] = useState("Create a promotion code for storefront and checkout testing.");
 
   async function createPromotion() {
@@ -22,8 +21,7 @@ export function CouponCreateForm() {
     const response = await fetch("/api/admin/coupons", {
       method: "POST",
       headers: {
-        "content-type": "application/json",
-        "x-admin-token": adminToken
+        "content-type": "application/json"
       },
       body: JSON.stringify({
         code,
@@ -61,9 +59,6 @@ export function CouponCreateForm() {
         </label>
         <label>Minimum subtotal
           <input inputMode="decimal" value={minSubtotal} onChange={(event) => setMinSubtotal(event.target.value)} />
-        </label>
-        <label className="fullField">Admin token
-          <input type="password" value={adminToken} onChange={(event) => setAdminToken(event.target.value)} placeholder="ADMIN_TOKEN" />
         </label>
       </div>
       <p className="statusText">{message}</p>

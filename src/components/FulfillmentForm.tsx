@@ -16,15 +16,13 @@ type ApiResult<T> = {
 export function FulfillmentForm({ orderId }: FulfillmentFormProps) {
   const router = useRouter();
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [adminToken, setAdminToken] = useState("");
   const [message, setMessage] = useState("");
 
   async function submitFulfillment() {
     const response = await fetch("/api/admin/fulfillment", {
       method: "POST",
       headers: {
-        "content-type": "application/json",
-        "x-admin-token": adminToken
+        "content-type": "application/json"
       },
       body: JSON.stringify({ orderId, trackingNumber })
     });
@@ -47,14 +45,6 @@ export function FulfillmentForm({ orderId }: FulfillmentFormProps) {
         placeholder="Tracking number"
         value={trackingNumber}
         onChange={(event) => setTrackingNumber(event.target.value)}
-      />
-      <input
-        aria-label="Admin token"
-        data-testid={`admin-token-${orderId}`}
-        placeholder="ADMIN_TOKEN"
-        type="password"
-        value={adminToken}
-        onChange={(event) => setAdminToken(event.target.value)}
       />
       <button data-testid={`save-tracking-${orderId}`} type="button" onClick={submitFulfillment}>Save tracking</button>
       {message ? <span>{message}</span> : null}

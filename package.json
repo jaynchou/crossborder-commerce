@@ -6,8 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.mjs",
+    "visual:smoke": "node scripts/visual-smoke.mjs"
   },
   "dependencies": {
     "next": "^15.3.5",
@@ -16,10 +18,12 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^22.13.14",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "eslint": "^9.31.0",
+    "@playwright/test": "^1.61.1",
     "eslint-config-next": "^15.3.5",
     "typescript": "^5.8.3"
   }

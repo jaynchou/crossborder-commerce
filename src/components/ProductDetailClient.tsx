@@ -39,6 +39,7 @@ export function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [selectedVariantId, setSelectedVariantId] = useState(variants[0]?.id ?? "");
   const [message, setMessage] = useState("Ready to ship from " + product.shipFrom);
+  const [selectedImage, setSelectedImage] = useState(product.images[0]);
   const [reviews] = useState(initialReviews);
   const [reviewName, setReviewName] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
@@ -70,6 +71,13 @@ export function ProductDetailClient({
   function addToCart() {
     addStoredCartItem(product.id, quantity);
     setMessage(`${quantity} ${product.title} added to cart.`);
+  }
+
+  function selectOption(name: string, value: string) {
+    const matchingVariant = variants.find((variant) => variant.attributes[name] === value);
+    if (matchingVariant) {
+      setSelectedVariantId(matchingVariant.id);
+    }
   }
 
   async function submitReview() {
@@ -119,11 +127,11 @@ export function ProductDetailClient({
       <section className="productDetailShell">
         <div className="productGallery">
           <div className="galleryHero">
-            <img src={product.images[0]} alt={product.title} />
+            <img src={selectedImage} alt={product.title} />
           </div>
           <div className="galleryThumbs">
             {[product.images[0], product.images[0], product.images[0]].map((image, index) => (
-              <button type="button" key={`${image}-${index}`}>
+              <button type="button" key={`${image}-${index}`} onClick={() => setSelectedImage(image)}>
                 <img src={image} alt={`${product.title} view ${index + 1}`} />
               </button>
             ))}
@@ -171,6 +179,7 @@ export function ProductDetailClient({
                         className={selectedVariant?.attributes[group.name] === value ? "choiceActive" : "choiceButton"}
                         type="button"
                         key={value}
+                        onClick={() => selectOption(group.name, value)}
                       >
                         {value}
                       </button>

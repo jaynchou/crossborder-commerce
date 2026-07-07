@@ -19,6 +19,13 @@ export type Product = {
   status: "active" | "draft";
 };
 
+export type CategoryPage = {
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
+};
+
 export type ProductAttribute = {
   id: string;
   name: string;
@@ -124,6 +131,21 @@ export type StoreSettings = {
   defaultCurrency: string;
   supportedCountries: string[];
   taxRate: number;
+};
+
+export type PageContent = {
+  promoBar: string[];
+  hero: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    primaryLabel: string;
+    primaryHref: string;
+    secondaryLabel: string;
+    secondaryHref: string;
+    featuredProductId: string;
+  };
+  template: "editorial-grid" | "product-focus";
 };
 
 export type PaymentMethod = {

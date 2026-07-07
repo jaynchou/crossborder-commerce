@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/AdminLayout";
+import { SettingsForm } from "@/components/SettingsForm";
 import { getSettings } from "@/lib/store";
 
 export default function TaxPage() {
@@ -23,6 +24,7 @@ export default function TaxPage() {
           </div>
         </div>
       </section>
+      <SettingsForm settings={settings} />
     </AdminLayout>
   );
 }

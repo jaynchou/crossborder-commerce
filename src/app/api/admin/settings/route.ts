@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { handleApiError, ok, requireAdmin } from "@/lib/http";
 import { settingsSchema } from "@/lib/schemas";
 import { getSettings, updateSettings } from "@/lib/store";
@@ -15,7 +16,10 @@ export async function PUT(request: Request) {
 
   try {
     const body = settingsSchema.parse(await request.json());
-    return ok(updateSettings(body));
+    const settings = updateSettings(body);
+    revalidatePath("/");
+    revalidatePath("/sitemap.xml");
+    return ok(settings);
   } catch (error) {
     return handleApiError(error);
   }

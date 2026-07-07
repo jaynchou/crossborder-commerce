@@ -1,10 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AdminSignOutButton } from "@/components/AdminSignOutButton";
 
 const navItems = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/content", label: "Content" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/products/new", label: "Add Product" },
+  { href: "/admin/merchandising", label: "Merchandising" },
   { href: "/admin/media", label: "Media" },
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/attributes", label: "Attributes" },
@@ -38,6 +41,7 @@ export function AdminLayout({ eyebrow = "Commerce admin", title, children }: Adm
         {navItems.map((item) => (
           <Link href={item.href} key={item.href}>{item.label}</Link>
         ))}
+        <AdminSignOutButton />
       </aside>
       <section className="adminMain">
         <div className="adminHeader">

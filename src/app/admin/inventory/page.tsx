@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/AdminLayout";
+import { InventoryManager } from "@/components/InventoryManager";
 import { listInventory } from "@/lib/store";
 
 export default function InventoryPage() {
@@ -6,21 +7,7 @@ export default function InventoryPage() {
 
   return (
     <AdminLayout eyebrow="Operations" title="Inventory">
-      <section className="panel">
-        <h2>Stock and reservations</h2>
-        <div className="table">
-          {inventory.map((item) => (
-            <div className="tableRow inventoryRow" key={item.productId}>
-              <span>{item.sku}</span>
-              <span>{item.title}</span>
-              <span>Stock {item.stock}</span>
-              <span>Reserved {item.reserved}</span>
-              <span>Available {item.available}</span>
-              <span>{item.shipFrom}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <InventoryManager inventory={inventory} />
     </AdminLayout>
   );
 }

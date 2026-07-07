@@ -5,8 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { money } from "@/components/Money";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { addStoredCartItem, readStoredCart } from "@/components/cartStorage";
-import type { CartItem, Coupon, Product, ShippingRate, StoreSettings } from "@/lib/types";
+import { addStoredCartItem, readStoredCart, writeStoredCart } from "@/components/cartStorage";
+import { categoryToSlug } from "@/lib/slugs";
+import type { CartItem, Coupon, PageContent, Product, ShippingRate, StoreSettings } from "@/lib/types";
 
 type QuoteItem = CartItem & {
   product: Product;
@@ -39,14 +40,22 @@ type StorefrontClientProps = {
   shippingRates: ShippingRate[];
   initialQuote: CartQuote;
   settings: StoreSettings;
+  content: PageContent;
 };
 
-const categoryVisuals = [
-  { title: "New Arrivals", copy: "Fresh SKUs for fast product testing", image: "/products/scarf.svg" },
-  { title: "Bags", copy: "Packable pieces with simple variants", image: "/products/bag.svg" },
-  { title: "Lifestyle", copy: "Lightweight gifts and daily essentials", image: "/products/tea.svg" },
-  { title: "Sale", copy: "Promotions, bundles, and margin tests", image: "/products/scarf.svg" }
-];
+function emptyCartQuote(reference: CartQuote): CartQuote {
+  return {
+    items: [],
+    subtotal: 0,
+    discount: 0,
+    shipping: 0,
+    tax: 0,
+    total: 0,
+    currency: reference.currency,
+    shippingRate: null,
+    coupon: null
+  };
+}
 
 export function StorefrontClient({
   storeName,
@@ -55,11 +64,22 @@ export function StorefrontClient({
   coupons,
   shippingRates,
   initialQuote,
-  settings
+  settings,
+  content
 }: StorefrontClientProps) {
   const featured = useMemo(() => products.filter((product) => product.featured), [products]);
+  const heroProduct = products.find((product) => product.id === content.hero.featuredProductId) ?? featured[0] ?? products[0];
+  const categoryCards = categories.map((category) => {
+    const categoryProducts = products.filter((product) => product.category === category);
+    return {
+      title: category,
+      copy: `${categoryProducts.length} active ${categoryProducts.length === 1 ? "product" : "products"}`,
+      image: categoryProducts[0]?.images[0] ?? "/products/scarf.svg",
+      href: `/${categoryToSlug(category)}`
+    };
+  });
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [quote, setQuote] = useState<CartQuote>(initialQuote);
+  const [quote, setQuote] = useState<CartQuote>(() => emptyCartQuote(initialQuote));
   const [message, setMessage] = useState("Curated cross-border essentials, ready to test.");
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -69,7 +89,7 @@ export function StorefrontClient({
 
   useEffect(() => {
     if (!cartItems.length) {
-      setQuote(initialQuote);
+      setQuote(emptyCartQuote(initialQuote));
       return;
     }
 
@@ -110,12 +130,19 @@ export function StorefrontClient({
     setIsCartOpen(true);
   }
 
+  function removeFromCart(item: QuoteItem) {
+    const nextItems = cartItems.filter((cartItem) => cartItem.productId !== item.productId);
+    writeStoredCart(nextItems);
+    setCartItems(nextItems);
+    setMessage(`${item.product.title} removed from cart.`);
+  }
+
   return (
     <main className="storefront">
       <div className="promoBar">
-        <span>Free international shipping on orders $79+</span>
-        <span>10% off with code LAUNCH10</span>
-        <span>30-day returns on test orders</span>
+        {content.promoBar.map((line) => (
+          <span key={line}>{line}</span>
+        ))}
       </div>
 
       <SiteHeader
@@ -146,6 +173,13 @@ export function StorefrontClient({
                     <div>
                       <strong>{item.product.title}</strong>
                       <span>Qty {item.quantity}</span>
+                      <button
+                        className="textButton removeCartItem"
+                        type="button"
+                        onClick={() => removeFromCart(item)}
+                      >
+                        Remove
+                      </button>
                     </div>
                     <b>{money(item.subtotal, quote.currency)}</b>
                   </div>
@@ -169,25 +203,22 @@ export function StorefrontClient({
         </div>
       ) : null}
 
-      <section className="retailHero" id="new">
+      <section className={`retailHero ${content.template === "product-focus" ? "productFocusHero" : ""}`} id="new">
         <div className="heroCopy">
-          <span className="microLabel">New collection</span>
-          <h1>Effortless products for global shoppers.</h1>
-          <p>
-            Launch a polished storefront with fashion-inspired merchandising, cross-border shipping
-            logic, coupons, inventory reservations, and an admin workflow ready for product testing.
-          </p>
+          <span className="microLabel">{content.hero.eyebrow}</span>
+          <h1>{content.hero.title}</h1>
+          <p>{content.hero.body}</p>
           <div className="actions">
-            <a className="primaryButton" href="#products">Shop best sellers</a>
-            <Link className="outlineButton" href="/cart">Review cart</Link>
+            <a className="primaryButton" href={content.hero.primaryHref}>{content.hero.primaryLabel}</a>
+            <Link className="outlineButton" href={content.hero.secondaryHref}>{content.hero.secondaryLabel}</Link>
           </div>
         </div>
         <div className="heroMerch">
           <div className="heroProduct heroProductLarge">
-            <img src="/products/bag.svg" alt="Packable Daily Tote" />
+            <img src={heroProduct.images[0]} alt={heroProduct.title} />
             <div>
               <span>Featured edit</span>
-              <strong>Packable Daily Tote</strong>
+              <strong>{heroProduct.title}</strong>
             </div>
           </div>
           <div className="heroProduct">
@@ -207,12 +238,12 @@ export function StorefrontClient({
           <p>Organize your first catalog like a real retail site, even while products are changing.</p>
         </div>
         <div className="categoryTiles">
-          {categoryVisuals.map((category) => (
-            <a className="categoryTile" href="#products" key={category.title}>
+          {categoryCards.map((category) => (
+            <Link className="categoryTile" href={category.href} key={category.title}>
               <img src={category.image} alt="" />
               <strong>{category.title}</strong>
               <span>{category.copy}</span>
-            </a>
+            </Link>
           ))}
         </div>
       </section>

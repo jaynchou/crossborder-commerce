@@ -1,10 +1,12 @@
 import type {
   Address,
+  CategoryPage,
   CartItem,
   Coupon,
   Customer,
   MediaAsset,
   Order,
+  PageContent,
   PaymentMethod,
   Product,
   ProductAttribute,
@@ -14,9 +16,13 @@ import type {
   ShippingRate,
   StoreSettings
 } from "./types";
+import { categoryToSlug } from "./slugs";
 
 type StoreState = {
   settings: StoreSettings;
+  pageContent: PageContent;
+  categories: string[];
+  categoryPages: CategoryPage[];
   products: Product[];
   coupons: Coupon[];
   productAttributes: ProductAttribute[];
@@ -32,13 +38,17 @@ type StoreState = {
 
 declare global {
   // Keeps the in-memory repository coherent across Next.js route/page module instances.
-  // eslint-disable-next-line no-var
   var __crossborderStore: StoreState | undefined;
 }
 
 const store = globalThis.__crossborderStore ??= createInitialStore();
+store.pageContent ??= createDefaultPageContent();
+store.categoryPages ??= createDefaultCategoryPages(store.categories);
 const {
   settings,
+  pageContent,
+  categories,
+  categoryPages,
   products,
   coupons,
   productAttributes,
@@ -60,6 +70,9 @@ function createInitialStore(): StoreState {
       supportedCountries: ["US", "CA", "GB", "AU", "SG", "JP"],
       taxRate: 0.07
     },
+    pageContent: createDefaultPageContent(),
+    categories: ["Apparel", "Food & Beverage", "Bags"],
+    categoryPages: createDefaultCategoryPages(["Apparel", "Food & Beverage", "Bags"]),
     products: [
       {
         id: "album-cloud-001",
@@ -252,19 +265,133 @@ export function listAllProducts() {
 }
 
 export function listCategories() {
-  return Array.from(new Set(products.map((product) => product.category))).sort();
+  return Array.from(new Set([...categories, ...products.map((product) => product.category)])).sort();
+}
+
+export function listCategoryPages() {
+  return listCategories().map((category) => getCategoryPage(category));
+}
+
+export function findCategoryPageBySlug(slug: string) {
+  return listCategoryPages().find((category) => category.slug === decodeURIComponent(slug));
 }
 
 export function listCategoryStats() {
   return listCategories().map((category) => {
     const categoryProducts = products.filter((product) => product.category === category);
+    const categoryPage = getCategoryPage(category);
     return {
       name: category,
+      slug: categoryPage.slug,
+      description: categoryPage.description,
+      image: categoryPage.image,
       products: categoryProducts.length,
       active: categoryProducts.filter((product) => product.status === "active").length,
       stock: categoryProducts.reduce((sum, product) => sum + product.stock, 0)
     };
   });
+}
+
+export function createCategory(input: string | { name: string; description?: string; image?: string }) {
+  const normalizedName = (typeof input === "string" ? input : input.name).trim();
+  if (!normalizedName) {
+    throw new Error("Category name is required");
+  }
+  if (listCategories().some((category) => category.toLowerCase() === normalizedName.toLowerCase())) {
+    throw new Error("Category already exists");
+  }
+
+  categories.push(normalizedName);
+  const categoryPage = upsertCategoryPage({
+    name: normalizedName,
+    description: typeof input === "string" ? undefined : input.description,
+    image: typeof input === "string" ? undefined : input.image
+  });
+  return {
+    name: normalizedName,
+    slug: categoryPage.slug,
+    description: categoryPage.description,
+    image: categoryPage.image,
+    products: 0,
+    active: 0,
+    stock: 0
+  };
+}
+
+function createDefaultCategoryPages(categoryNames: string[]): CategoryPage[] {
+  return categoryNames.map((category) => ({
+    name: category,
+    slug: categoryToSlug(category),
+    description: defaultCategoryDescription(category),
+    image: seededCategoryImage(category)
+  }));
+}
+
+function getCategoryPage(category: string) {
+  const existing = categoryPages.find((page) => page.name.toLowerCase() === category.toLowerCase());
+  if (existing) return existing;
+
+  return upsertCategoryPage({ name: category });
+}
+
+function upsertCategoryPage(input: { name: string; description?: string; image?: string }) {
+  const existing = categoryPages.find((page) => page.name.toLowerCase() === input.name.toLowerCase());
+  const page: CategoryPage = {
+    name: input.name,
+    slug: categoryToSlug(input.name),
+    description: input.description?.trim() || existing?.description || defaultCategoryDescription(input.name),
+    image: input.image?.trim() || existing?.image || defaultCategoryImage(input.name)
+  };
+
+  if (existing) {
+    existing.slug = page.slug;
+    existing.description = page.description;
+    existing.image = page.image;
+    return existing;
+  }
+
+  categoryPages.push(page);
+  return page;
+}
+
+function defaultCategoryDescription(category: string) {
+  return `Shop curated ${category.toLowerCase()} products with transparent cross-border shipping, promotions, and delivery estimates.`;
+}
+
+function defaultCategoryImage(category: string) {
+  const product = products.find((item) => item.category.toLowerCase() === category.toLowerCase());
+  return product?.images[0] ?? seededCategoryImage(category);
+}
+
+function seededCategoryImage(category: string) {
+  if (category.toLowerCase().includes("bag")) return "/products/bag.svg";
+  if (category.toLowerCase().includes("food") || category.toLowerCase().includes("tea")) return "/products/tea.svg";
+  return "/products/scarf.svg";
+}
+
+function createDefaultPageContent(): PageContent {
+  return {
+    promoBar: [
+      "Free international shipping on orders $79+",
+      "10% off with code LAUNCH10",
+      "30-day returns on test orders"
+    ],
+    hero: {
+      eyebrow: "New collection",
+      title: "Effortless products for global shoppers.",
+      body: "Launch a polished storefront with fashion-inspired merchandising, cross-border shipping logic, coupons, inventory reservations, and an admin workflow ready for product testing.",
+      primaryLabel: "Shop best sellers",
+      primaryHref: "#products",
+      secondaryLabel: "Review cart",
+      secondaryHref: "/cart",
+      featuredProductId: "album-bag-003"
+    },
+    template: "editorial-grid"
+  };
+}
+
+export function getDefaultPageContent() {
+  return createDefaultPageContent();
 }
 
 export function listTags() {
@@ -275,6 +402,19 @@ export function listProductAttributes() {
   return productAttributes;
 }
 
+export function createProductAttribute(input: Omit<ProductAttribute, "id"> & { id?: string }) {
+  if (productAttributes.some((attribute) => attribute.name.toLowerCase() === input.name.toLowerCase())) {
+    throw new Error("Attribute already exists");
+  }
+
+  const attribute: ProductAttribute = {
+    ...input,
+    id: input.id ?? `attr-${input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`
+  };
+  productAttributes.unshift(attribute);
+  return attribute;
+}
+
 export function listProductVariants(productId?: string) {
   if (!productId) return productVariants;
   return productVariants.filter((variant) => variant.productId === productId);
@@ -282,6 +422,31 @@ export function listProductVariants(productId?: string) {
 
 export function listMediaAssets() {
   return mediaAssets;
+}
+
+export function createMediaAsset(input: Omit<MediaAsset, "id"> & { id?: string }) {
+  const asset: MediaAsset = {
+    ...input,
+    id: input.id ?? `media-${Date.now()}`
+  };
+  mediaAssets.unshift(asset);
+  return asset;
+}
+
+export function createProductVariant(input: Omit<ProductVariant, "id"> & { id?: string }) {
+  if (!getProduct(input.productId)) {
+    throw new Error("Product not found");
+  }
+  if (productVariants.some((variant) => variant.sku.toLowerCase() === input.sku.toLowerCase())) {
+    throw new Error("Variant SKU already exists");
+  }
+
+  const variant: ProductVariant = {
+    ...input,
+    id: input.id ?? `variant-${input.productId}-${input.sku}`.replace(/\s+/g, "-")
+  };
+  productVariants.unshift(variant);
+  return variant;
 }
 
 export function getProduct(id: string) {
@@ -298,6 +463,9 @@ export function createProduct(input: Omit<Product, "id"> & {
     id: productInput.id ?? `product-${Date.now()}`
   };
   products.unshift(product);
+  if (!categories.some((category) => category.toLowerCase() === product.category.toLowerCase())) {
+    categories.push(product.category);
+  }
 
   for (const variant of variants) {
     productVariants.unshift({
@@ -305,6 +473,25 @@ export function createProduct(input: Omit<Product, "id"> & {
       id: variant.id ?? `variant-${product.id}-${variant.sku}`.replace(/\s+/g, "-"),
       productId: product.id
     });
+  }
+
+  return product;
+}
+
+export function updateProduct(id: string, input: Omit<Product, "id">) {
+  const index = products.findIndex((product) => product.id === id);
+  if (index === -1) {
+    throw new Error("Product not found");
+  }
+
+  const product: Product = {
+    ...input,
+    id
+  };
+  products[index] = product;
+
+  if (!categories.some((category) => category.toLowerCase() === product.category.toLowerCase())) {
+    categories.push(product.category);
   }
 
   return product;
@@ -327,12 +514,42 @@ export function createCoupon(input: Coupon) {
   return coupon;
 }
 
+export function updateCouponStatus(code: string, active: boolean) {
+  const coupon = coupons.find((item) => item.code.toUpperCase() === code.toUpperCase());
+  if (!coupon) {
+    throw new Error("Coupon not found");
+  }
+
+  coupon.active = active;
+  return coupon;
+}
+
 export function listPaymentMethods() {
   return paymentMethods;
 }
 
+export function updatePaymentMethodStatus(id: string, enabled: boolean) {
+  const method = paymentMethods.find((item) => item.id === id);
+  if (!method) {
+    throw new Error("Payment method not found");
+  }
+
+  method.enabled = enabled;
+  return method;
+}
+
 export function listRefunds() {
   return refunds;
+}
+
+export function updateRefundStatus(id: string, status: Refund["status"]) {
+  const refund = refunds.find((item) => item.id === id);
+  if (!refund) {
+    throw new Error("Refund not found");
+  }
+
+  refund.status = status;
+  return refund;
 }
 
 export function listReviews() {
@@ -361,6 +578,16 @@ export function createReview(input: Pick<Review, "productId" | "customerName" | 
   return review;
 }
 
+export function updateReviewStatus(id: string, status: Review["status"]) {
+  const review = reviews.find((item) => item.id === id);
+  if (!review) {
+    throw new Error("Review not found");
+  }
+
+  review.status = status;
+  return review;
+}
+
 export function validateCoupon(code: string, subtotal: number) {
   const coupon = coupons.find((item) => item.code.toUpperCase() === code.toUpperCase() && item.active);
   if (!coupon) return null;
@@ -371,6 +598,15 @@ export function validateCoupon(code: string, subtotal: number) {
 export function listShippingRates(country?: string) {
   if (!country) return shippingRates;
   return shippingRates.filter((rate) => rate.countries.includes(country));
+}
+
+export function createShippingRate(input: ShippingRate) {
+  if (shippingRates.some((rate) => rate.id === input.id)) {
+    throw new Error("Shipping rate already exists");
+  }
+
+  shippingRates.unshift(input);
+  return input;
 }
 
 export function listRelatedProducts(productId: string, limit = 4) {
@@ -473,6 +709,35 @@ export function listOrders() {
   return orders;
 }
 
+export function updateOrderStatus(input: {
+  id: string;
+  status: Order["status"];
+  paymentStatus?: Order["paymentStatus"];
+  fulfillmentStatus?: Order["fulfillmentStatus"];
+}) {
+  const order = orders.find((item) => item.id === input.id);
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  order.status = input.status;
+  if (input.paymentStatus) order.paymentStatus = input.paymentStatus;
+  if (input.fulfillmentStatus) order.fulfillmentStatus = input.fulfillmentStatus;
+
+  if (input.status === "paid") {
+    order.paymentStatus = "paid";
+    order.fulfillmentStatus = order.fulfillmentStatus === "fulfilled" ? "fulfilled" : "unfulfilled";
+  }
+  if (input.status === "cancelled") {
+    order.paymentStatus = order.paymentStatus === "paid" ? "refunded" : "failed";
+  }
+  if (input.status === "refunded") {
+    order.paymentStatus = "refunded";
+  }
+
+  return order;
+}
+
 export function listCustomers() {
   return customers;
 }
@@ -489,6 +754,30 @@ export function listInventory() {
   }));
 }
 
+export function updateInventory(input: { productId: string; stock: number; reserved?: number }) {
+  const product = getProduct(input.productId);
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  const reserved = input.reserved ?? product.reserved;
+  if (reserved > input.stock) {
+    throw new Error("Reserved quantity cannot exceed stock");
+  }
+
+  product.stock = input.stock;
+  product.reserved = reserved;
+  return {
+    productId: product.id,
+    sku: product.sku,
+    title: product.title,
+    stock: product.stock,
+    reserved: product.reserved,
+    available: product.stock - product.reserved,
+    shipFrom: product.shipFrom
+  };
+}
+
 export function fulfillOrder(orderId: string, trackingNumber: string) {
   const order = orders.find((item) => item.id === orderId);
   if (!order) {
@@ -502,6 +791,17 @@ export function fulfillOrder(orderId: string, trackingNumber: string) {
 
 export function getSettings() {
   return settings;
+}
+
+export function getPageContent() {
+  return pageContent;
+}
+
+export function updatePageContent(input: PageContent) {
+  pageContent.promoBar = input.promoBar;
+  pageContent.hero = input.hero;
+  pageContent.template = input.template;
+  return pageContent;
 }
 
 export function updateSettings(input: Partial<StoreSettings>) {

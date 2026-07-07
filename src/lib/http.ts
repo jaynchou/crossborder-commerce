@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { ADMIN_COOKIE } from "@/lib/adminAuth";
 
 export function ok<T>(data: T, init?: ResponseInit) {
   return NextResponse.json({ ok: true, data }, init);
@@ -24,10 +26,28 @@ export function handleApiError(error: unknown) {
 export function requireAdmin(request: Request) {
   const expected = process.env.ADMIN_TOKEN;
   const received = request.headers.get("x-admin-token");
+  const session = getCookie(request, ADMIN_COOKIE);
 
-  if (!expected || received !== expected) {
+  if (!expected || (received !== expected && session !== createAdminSessionValueSync(expected))) {
     return fail("Unauthorized", 401);
   }
 
   return null;
+}
+
+function createAdminSessionValueSync(adminToken: string) {
+  return createHash("sha256")
+    .update(`crossborder-admin-session:${adminToken}`)
+    .digest("hex");
+}
+
+function getCookie(request: Request, name: string) {
+  const cookie = request.headers.get("cookie");
+  if (!cookie) return undefined;
+
+  return cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`))
+    ?.slice(name.length + 1);
 }

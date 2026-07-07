@@ -1,5 +1,7 @@
+import { revalidatePath } from "next/cache";
 import { handleApiError, ok, requireAdmin } from "@/lib/http";
 import { productSchema } from "@/lib/schemas";
+import { categoryToSlug } from "@/lib/slugs";
 import { createProduct, listAllProducts } from "@/lib/store";
 
 export async function GET(request: Request) {
@@ -15,7 +17,12 @@ export async function POST(request: Request) {
 
   try {
     const body = productSchema.parse(await request.json());
-    return ok(createProduct(body), { status: 201 });
+    const product = createProduct(body);
+    revalidatePath("/");
+    revalidatePath(`/${categoryToSlug(product.category)}`);
+    revalidatePath(`/products/${product.id}`);
+    revalidatePath("/sitemap.xml");
+    return ok(product, { status: 201 });
   } catch (error) {
     return handleApiError(error);
   }

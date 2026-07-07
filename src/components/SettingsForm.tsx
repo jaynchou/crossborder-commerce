@@ -18,7 +18,6 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   const [defaultCurrency, setDefaultCurrency] = useState(settings.defaultCurrency);
   const [supportedCountries, setSupportedCountries] = useState(settings.supportedCountries.join(", "));
   const [taxRatePercent, setTaxRatePercent] = useState(String(Math.round(settings.taxRate * 100)));
-  const [adminToken, setAdminToken] = useState("");
   const [message, setMessage] = useState("Settings are loaded from the in-memory repository.");
 
   async function saveSettings() {
@@ -26,8 +25,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     const response = await fetch("/api/admin/settings", {
       method: "PUT",
       headers: {
-        "content-type": "application/json",
-        "x-admin-token": adminToken
+        "content-type": "application/json"
       },
       body: JSON.stringify({
         name,
@@ -64,9 +62,6 @@ export function SettingsForm({ settings }: SettingsFormProps) {
         </label>
         <label>Tax rate percent
           <input data-testid="settings-tax" inputMode="decimal" value={taxRatePercent} onChange={(event) => setTaxRatePercent(event.target.value)} />
-        </label>
-        <label>Admin token
-          <input data-testid="settings-admin-token" type="password" value={adminToken} onChange={(event) => setAdminToken(event.target.value)} placeholder="ADMIN_TOKEN" />
         </label>
       </div>
       <p className="statusText">{message}</p>

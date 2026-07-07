@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Coupon, Product } from "@/lib/types";
 import { money } from "@/components/Money";
+import { categoryToSlug } from "@/lib/slugs";
 
 type SiteHeaderProps = {
   storeName?: string;
@@ -30,12 +31,12 @@ export function SiteHeader({
       <nav className="storeNav megaNav" aria-label="Store navigation">
         <Link href="/">Home</Link>
         <div className="megaNavItem">
-          <a href="/#products">Shop</a>
+          <Link href="/#products">Shop</Link>
           <div className="megaMenu" aria-label="Shop categories">
             <div>
               <span className="microLabel">Categories</span>
               {categories.map((category) => (
-                <a href={`/#products`} key={category}>{category}</a>
+                <Link href={`/${categoryToSlug(category)}`} key={category}>{category}</Link>
               ))}
             </div>
             <div>

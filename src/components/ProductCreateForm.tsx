@@ -35,7 +35,6 @@ export function ProductCreateForm({ categories, tags, attributes }: ProductCreat
   const [color, setColor] = useState(attributes.find((item) => item.name === "Color")?.values.join(", ") ?? "Stone, Sage, Black");
   const [size, setSize] = useState(attributes.find((item) => item.name === "Size")?.values.join(", ") ?? "S, M, L");
   const [images, setImages] = useState<PreviewImage[]>([]);
-  const [adminToken, setAdminToken] = useState("");
   const [message, setMessage] = useState("Draft has not been saved.");
 
   const variants = useMemo(() => {
@@ -81,8 +80,7 @@ export function ProductCreateForm({ categories, tags, attributes }: ProductCreat
     const response = await fetch("/api/admin/products", {
       method: "POST",
       headers: {
-        "content-type": "application/json",
-        "x-admin-token": adminToken
+        "content-type": "application/json"
       },
       body: JSON.stringify(buildPayload())
     });
@@ -224,7 +222,6 @@ export function ProductCreateForm({ categories, tags, attributes }: ProductCreat
               <input checked={featured} type="checkbox" onChange={(event) => setFeatured(event.target.checked)} />
               Feature on storefront
             </label>
-            <label>Admin token<input data-testid="product-admin-token" value={adminToken} onChange={(event) => setAdminToken(event.target.value)} placeholder="ADMIN_TOKEN" type="password" /></label>
             <p className="statusText">{message}</p>
           </section>
 

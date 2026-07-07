@@ -81,11 +81,31 @@ export const settingsSchema = z.object({
   taxRate: z.number().min(0).max(1)
 });
 
+export const pageContentSchema = z.object({
+  promoBar: z.array(z.string().min(1).max(120)).min(1).max(4),
+  hero: z.object({
+    eyebrow: z.string().min(1).max(80),
+    title: z.string().min(4).max(140),
+    body: z.string().min(8).max(360),
+    primaryLabel: z.string().min(1).max(40),
+    primaryHref: z.string().min(1).max(160),
+    secondaryLabel: z.string().min(1).max(40),
+    secondaryHref: z.string().min(1).max(160),
+    featuredProductId: z.string().min(1)
+  }),
+  template: z.enum(["editorial-grid", "product-focus"])
+});
+
 export const reviewSchema = z.object({
   productId: z.string().min(1),
   customerName: z.string().min(2).max(80),
   rating: z.number().int().min(1).max(5),
   body: z.string().min(8).max(600)
+});
+
+export const reviewStatusSchema = z.object({
+  id: z.string().min(1),
+  status: z.enum(["pending", "approved", "spam"])
 });
 
 export const couponSchema = z.object({
@@ -94,4 +114,73 @@ export const couponSchema = z.object({
   value: z.number().positive(),
   active: z.boolean().default(true),
   minSubtotal: z.number().nonnegative().optional()
+});
+
+export const couponStatusSchema = z.object({
+  code: z.string().min(2).max(32).transform((value) => value.toUpperCase()),
+  active: z.boolean()
+});
+
+export const categorySchema = z.object({
+  name: z.string().min(2).max(80),
+  description: z.string().min(8).max(260).optional(),
+  image: z.string().min(1).max(220).optional()
+});
+
+export const attributeSchema = z.object({
+  name: z.string().min(2).max(60),
+  values: z.array(z.string().min(1)).min(1),
+  visible: z.boolean().default(true),
+  variation: z.boolean().default(false)
+});
+
+export const adminShippingRateSchema = z.object({
+  id: z.string().min(2).max(80),
+  name: z.string().min(2).max(80),
+  countries: z.array(z.string().length(2).transform((value) => value.toUpperCase())).min(1),
+  basePrice: z.number().nonnegative(),
+  perKgPrice: z.number().nonnegative(),
+  etaDays: z.string().min(1).max(30)
+});
+
+export const paymentMethodStatusSchema = z.object({
+  id: z.string().min(1),
+  enabled: z.boolean()
+});
+
+export const refundStatusSchema = z.object({
+  id: z.string().min(1),
+  status: z.enum(["requested", "approved", "rejected", "paid"])
+});
+
+export const orderStatusSchema = z.object({
+  id: z.string().min(1),
+  status: z.enum(["pending_payment", "paid", "processing", "fulfilled", "cancelled", "refunded"]),
+  paymentStatus: z.enum(["unpaid", "authorized", "paid", "failed", "refunded"]).optional(),
+  fulfillmentStatus: z.enum(["unfulfilled", "partial", "fulfilled"]).optional()
+});
+
+export const inventoryAdjustmentSchema = z.object({
+  productId: z.string().min(1),
+  stock: z.number().int().nonnegative(),
+  reserved: z.number().int().nonnegative().optional()
+});
+
+export const mediaAssetSchema = z.object({
+  fileName: z.string().min(2).max(120),
+  url: z.string().min(1),
+  type: z.enum(["image", "video"]).default("image"),
+  alt: z.string().min(1).max(160),
+  sizeKb: z.number().int().nonnegative().default(0),
+  usedBy: z.array(z.string()).default([])
+});
+
+export const productVariantSchema = z.object({
+  productId: z.string().min(1),
+  sku: z.string().min(2),
+  attributes: z.record(z.string()),
+  price: z.number().positive(),
+  stock: z.number().int().nonnegative(),
+  weightGrams: z.number().int().positive(),
+  image: z.string().optional()
 });
