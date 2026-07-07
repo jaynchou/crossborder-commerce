@@ -130,19 +130,45 @@ export function CheckoutClient({ settings, shippingRates }: CheckoutClientProps)
   }
 
   return (
-    <main className="simplePage">
-      <nav className="simpleNav">
-        <Link href="/">Storefront</Link>
-        <Link href="/cart">Cart</Link>
-        <Link href="/admin/orders">Orders</Link>
-      </nav>
-      <section className="section">
-        <p className="eyebrow">Checkout</p>
-        <h1>Checkout workflow</h1>
-        <div className="checkoutGrid">
-          <section className="panel">
-            <h2>Customer and billing</h2>
-            <div className="formPreview twoColumns">
+    <main className="retailFlowPage">
+      <div className="promoBar">
+        <span>Encrypted checkout simulation</span>
+        <span>Inventory reserve happens after order creation</span>
+      </div>
+      <header className="storeHeader">
+        <Link className="brandLockup" href="/">
+          <strong>CrossBorder Commerce</strong>
+          <span>Global lifestyle commerce</span>
+        </Link>
+        <nav className="storeNav" aria-label="Checkout navigation">
+          <Link href="/">Storefront</Link>
+          <Link href="/cart">Cart</Link>
+          <Link href="/admin/orders">Orders</Link>
+        </nav>
+      </header>
+
+      <section className="flowHero checkoutHero">
+        <div>
+          <span className="microLabel">Secure checkout</span>
+          <h1>Checkout</h1>
+          <p>Capture a customer, quote international shipping, apply discounts, and create an order record.</p>
+        </div>
+        <div className="checkoutSteps" aria-label="Checkout progress">
+          <span>Cart</span>
+          <span className="active">Shipping</span>
+          <span>Payment</span>
+          <span>Review</span>
+        </div>
+      </section>
+
+      <section className="checkoutLayout">
+        <div className="checkoutMain">
+          <section className="checkoutPanel">
+            <div className="panelHeader">
+              <h2>Contact and shipping</h2>
+              <span>Step 1 of 3</span>
+            </div>
+            <div className="professionalForm twoColumns">
               <label>Name<input data-testid="checkout-name" value={address.name} onChange={(event) => updateAddress("name", event.target.value)} /></label>
               <label>Email<input data-testid="checkout-email" value={address.email ?? ""} onChange={(event) => updateAddress("email", event.target.value)} /></label>
               <label>Phone<input data-testid="checkout-phone" value={address.phone} onChange={(event) => updateAddress("phone", event.target.value)} /></label>
@@ -153,56 +179,82 @@ export function CheckoutClient({ settings, shippingRates }: CheckoutClientProps)
               </label>
               <label>Province<input data-testid="checkout-province" value={address.province} onChange={(event) => updateAddress("province", event.target.value)} /></label>
               <label>City<input data-testid="checkout-city" value={address.city} onChange={(event) => updateAddress("city", event.target.value)} /></label>
-              <label>Address<input data-testid="checkout-line1" value={address.line1} onChange={(event) => updateAddress("line1", event.target.value)} /></label>
+              <label className="fullField">Address<input data-testid="checkout-line1" value={address.line1} onChange={(event) => updateAddress("line1", event.target.value)} /></label>
               <label>Postal code<input data-testid="checkout-postal-code" value={address.postalCode} onChange={(event) => updateAddress("postalCode", event.target.value)} /></label>
             </div>
           </section>
 
-          <section className="panel">
-            <h2>Shipping method</h2>
-            <div className="formPreview">
-              <label>Shipping
-                <select data-testid="checkout-shipping-rate" value={shippingRateId} onChange={(event) => setShippingRateId(event.target.value)}>
-                  {shippingRates.map((rate) => (
-                    <option key={rate.id} value={rate.id}>
-                      {rate.name} | {money(rate.basePrice, settings.defaultCurrency)}+ | {rate.etaDays} days
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>Coupon<input data-testid="checkout-coupon" value={couponCode} onChange={(event) => setCouponCode(event.target.value.toUpperCase())} /></label>
+          <section className="checkoutPanel">
+            <div className="panelHeader">
+              <h2>Delivery method</h2>
+              <span>Step 2 of 3</span>
+            </div>
+            <div className="deliveryOptions">
+              {shippingRates.map((rate) => (
+                <label className={shippingRateId === rate.id ? "deliveryOption active" : "deliveryOption"} key={rate.id}>
+                  <input
+                    checked={shippingRateId === rate.id}
+                    name="shippingRate"
+                    type="radio"
+                    value={rate.id}
+                    onChange={(event) => setShippingRateId(event.target.value)}
+                  />
+                  <span>
+                    <strong>{rate.name}</strong>
+                    <small>{rate.etaDays} business days | {rate.countries.length} markets</small>
+                  </span>
+                  <b>{money(rate.basePrice, settings.defaultCurrency)}+</b>
+                </label>
+              ))}
             </div>
           </section>
 
-          <section className="panel">
-            <h2>Payment</h2>
-            <div className="miniRow"><span>Provider</span><strong>Manual test payment</strong></div>
-            <div className="miniRow"><span>Status</span><strong>Creates unpaid order for admin review</strong></div>
-          </section>
-
-          <section className="summaryPanel">
-            <h2>Order total</h2>
-            {quote ? (
-              <>
-                <div className="summaryRow"><span>Subtotal</span><strong>{money(quote.subtotal, quote.currency)}</strong></div>
-                <div className="summaryRow"><span>Coupon {quote.coupon?.code ?? "None"}</span><strong>-{money(quote.discount, quote.currency)}</strong></div>
-                <div className="summaryRow"><span>Shipping</span><strong>{money(quote.shipping, quote.currency)}</strong></div>
-                <div className="summaryRow"><span>Tax</span><strong>{money(quote.tax, quote.currency)}</strong></div>
-                <div className="summaryRow totalRow"><span>Total</span><strong>{money(quote.total, quote.currency)}</strong></div>
-              </>
-            ) : (
-              <p>Your browser cart is empty. Add products before checkout.</p>
-            )}
-            <button data-testid="place-order" type="button" disabled={!quote} onClick={placeOrder}>Place order</button>
-            <p className="statusText">{message}</p>
-            {order ? (
-              <div className="successBox">
-                <strong>{order.id}</strong>
-                <span>{money(order.total, order.currency)} | {order.status}</span>
-              </div>
-            ) : null}
+          <section className="checkoutPanel">
+            <div className="panelHeader">
+              <h2>Payment</h2>
+              <span>Step 3 of 3</span>
+            </div>
+            <div className="paymentBox">
+              <strong>Manual test payment</strong>
+              <p>This creates an unpaid order for admin review. Stripe/PayPal adapters can attach here later.</p>
+            </div>
           </section>
         </div>
+
+        <aside className="orderSummaryCard checkoutSummary">
+          <h2>Order total</h2>
+          <label className="couponField">Promo code
+            <input data-testid="checkout-coupon" value={couponCode} onChange={(event) => setCouponCode(event.target.value.toUpperCase())} />
+          </label>
+          {quote ? (
+            <>
+              <div className="miniCartList">
+                {quote.items.map((item) => (
+                  <div className="miniCartLine" key={item.productId}>
+                    <img src={item.product.images[0]} alt={item.product.title} />
+                    <span>{item.product.title} x {item.quantity}</span>
+                    <strong>{money(item.subtotal, quote.currency)}</strong>
+                  </div>
+                ))}
+              </div>
+              <div className="summaryRow"><span>Subtotal</span><strong>{money(quote.subtotal, quote.currency)}</strong></div>
+              <div className="summaryRow"><span>Coupon {quote.coupon?.code ?? "None"}</span><strong>-{money(quote.discount, quote.currency)}</strong></div>
+              <div className="summaryRow"><span>Shipping</span><strong>{money(quote.shipping, quote.currency)}</strong></div>
+              <div className="summaryRow"><span>Tax</span><strong>{money(quote.tax, quote.currency)}</strong></div>
+              <div className="summaryRow totalRow"><span>Total</span><strong>{money(quote.total, quote.currency)}</strong></div>
+            </>
+          ) : (
+            <p>Your browser cart is empty. Add products before checkout.</p>
+          )}
+          <button className="wideButton" data-testid="place-order" type="button" disabled={!quote} onClick={placeOrder}>Place order</button>
+          <p className="statusText">{message}</p>
+          {order ? (
+            <div className="successBox">
+              <strong>{order.id}</strong>
+              <span>{money(order.total, order.currency)} | {order.status}</span>
+            </div>
+          ) : null}
+        </aside>
       </section>
     </main>
   );

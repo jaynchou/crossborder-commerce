@@ -48,7 +48,16 @@ export const productSchema = z.object({
   images: z.array(z.string()).default([]),
   tags: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
-  status: z.enum(["active", "draft"]).default("active")
+  status: z.enum(["active", "draft"]).default("active"),
+  variants: z.array(z.object({
+    id: z.string().optional(),
+    sku: z.string().min(2),
+    attributes: z.record(z.string()),
+    price: z.number().positive(),
+    stock: z.number().int().nonnegative(),
+    weightGrams: z.number().int().positive(),
+    image: z.string().optional()
+  })).default([])
 });
 
 export const couponValidationSchema = z.object({

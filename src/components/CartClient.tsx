@@ -67,7 +67,7 @@ export function CartClient({ products, countries, shippingRates }: CartClientPro
       if (!ignore) {
         if (result.ok && result.data) {
           setQuote(result.data);
-          setMessage("Totals updated from API.");
+          setMessage("Totals updated from live cart API.");
         } else {
           setQuote(null);
           setMessage(result.error ?? "Unable to calculate cart.");
@@ -105,104 +105,139 @@ export function CartClient({ products, countries, shippingRates }: CartClientPro
   }
 
   return (
-    <main className="simplePage">
-      <nav className="simpleNav">
-        <Link href="/">Storefront</Link>
-        <Link href="/checkout">Checkout</Link>
-        <Link href="/admin">Admin</Link>
-      </nav>
-      <section className="section">
-        <p className="eyebrow">Cart</p>
-        <h1>Shopping cart</h1>
-        <div className="sectionSplit">
-          <div className="panel">
-            <div className="panelHeader">
-              <h2>Items</h2>
-              <div className="actionsInline">
-                <button data-testid="load-sample-cart" type="button" onClick={loadSampleCart}>Load sample cart</button>
-                <button className="ghostButton" data-testid="clear-cart" type="button" onClick={clearCart}>Clear</button>
-              </div>
-            </div>
+    <main className="retailFlowPage">
+      <div className="promoBar">
+        <span>Free shipping $79+</span>
+        <span>LAUNCH10 applies automatically when eligible</span>
+      </div>
+      <header className="storeHeader">
+        <Link className="brandLockup" href="/">
+          <strong>CrossBorder Commerce</strong>
+          <span>Global lifestyle commerce</span>
+        </Link>
+        <nav className="storeNav" aria-label="Cart navigation">
+          <Link href="/">Continue shopping</Link>
+          <Link href="/checkout">Checkout</Link>
+          <Link href="/admin">Admin</Link>
+        </nav>
+      </header>
 
-            {items.length ? (
-              <div className="table">
-                {items.map((item) => {
-                  const product = products.find((candidate) => candidate.id === item.productId);
-                  if (!product) return null;
-
-                  return (
-                    <div className="tableRow cartRow" key={item.productId}>
-                      <span>{product.title}</span>
-                      <span>{product.sku}</span>
-                      <label className="quantityControl">
-                        Qty
-                        <input
-                          data-testid={`qty-${item.productId}`}
-                          min="0"
-                          max="99"
-                          type="number"
-                          value={item.quantity}
-                          onChange={(event) => setQuantity(item.productId, Number(event.target.value))}
-                        />
-                      </label>
-                      <span>{money(product.price, product.currency)}</span>
-                      <span>{money(product.price * item.quantity, product.currency)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="emptyState">
-                <h2>Your cart is empty</h2>
-                <p>Add products from the storefront or load the sample cart to test checkout.</p>
-              </div>
-            )}
-
-            <div className="formPreview twoColumns cartOptions">
-              <label>Country
-                <select value={country} onChange={(event) => setCountry(event.target.value)}>
-                  {countries.map((item) => <option key={item}>{item}</option>)}
-                </select>
-              </label>
-              <label>Coupon code
-                <input
-                  data-testid="cart-coupon"
-                  value={couponCode}
-                  onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
-                />
-              </label>
-              <label>Shipping method
-                <select
-                  data-testid="cart-shipping-rate"
-                  value={shippingRateId}
-                  onChange={(event) => setShippingRateId(event.target.value)}
-                >
-                  {shippingRates.map((rate) => <option key={rate.id} value={rate.id}>{rate.name}</option>)}
-                </select>
-              </label>
-            </div>
-            <p className="statusText">{message}</p>
-          </div>
-
-          <div className="summaryPanel">
-            <h2>Order summary</h2>
-            {quote ? (
-              <>
-                <div className="summaryRow"><span>Subtotal</span><strong>{money(quote.subtotal, quote.currency)}</strong></div>
-                <div className="summaryRow"><span>Discount</span><strong>-{money(quote.discount, quote.currency)}</strong></div>
-                <div className="summaryRow"><span>Shipping</span><strong>{money(quote.shipping, quote.currency)}</strong></div>
-                <div className="summaryRow"><span>Tax</span><strong>{money(quote.tax, quote.currency)}</strong></div>
-                <div className="summaryRow totalRow"><span>Total</span><strong>{money(quote.total, quote.currency)}</strong></div>
-                <Link className="primaryButton" data-testid="proceed-checkout" href="/checkout">Proceed to checkout</Link>
-              </>
-            ) : (
-              <>
-                <p>Add at least one item to calculate totals.</p>
-                <Link className="secondaryButton darkSecondary" href="/">Browse products</Link>
-              </>
-            )}
-          </div>
+      <section className="flowHero">
+        <div>
+          <span className="microLabel">Shopping bag</span>
+          <h1>Your cart</h1>
+          <p>Review quantities, shipping destination, discount code, and tax before checkout.</p>
         </div>
+        <div className="checkoutSteps" aria-label="Checkout progress">
+          <span className="active">Cart</span>
+          <span>Shipping</span>
+          <span>Payment</span>
+          <span>Review</span>
+        </div>
+      </section>
+
+      <section className="cartLayout">
+        <div className="cartMainPanel">
+          <div className="panelHeader">
+            <h2>Items</h2>
+            <div className="actionsInline">
+              <button data-testid="load-sample-cart" type="button" onClick={loadSampleCart}>Load sample cart</button>
+              <button className="ghostButton" data-testid="clear-cart" type="button" onClick={clearCart}>Clear</button>
+            </div>
+          </div>
+
+          {items.length ? (
+            <div className="cartLineList">
+              {items.map((item) => {
+                const product = products.find((candidate) => candidate.id === item.productId);
+                if (!product) return null;
+
+                return (
+                  <article className="cartLineItem" key={item.productId}>
+                    <Link className="lineImage" href={`/products/${product.id}`}>
+                      <img src={product.images[0]} alt={product.title} />
+                    </Link>
+                    <div className="lineDetails">
+                      <Link href={`/products/${product.id}`}><h3>{product.title}</h3></Link>
+                      <p>{product.category} | {product.shipFrom} | SKU {product.sku}</p>
+                      <button className="textButton" type="button" onClick={() => setQuantity(item.productId, 0)}>Remove</button>
+                    </div>
+                    <label className="quantityControl">
+                      Qty
+                      <input
+                        data-testid={`qty-${item.productId}`}
+                        min="0"
+                        max="99"
+                        type="number"
+                        value={item.quantity}
+                        onChange={(event) => setQuantity(item.productId, Number(event.target.value))}
+                      />
+                    </label>
+                    <div className="linePrice">
+                      <strong>{money(product.price * item.quantity, product.currency)}</strong>
+                      <span>{money(product.price, product.currency)} each</span>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="emptyState premiumEmpty">
+              <h2>Your cart is empty</h2>
+              <p>Add products from the storefront or load the sample cart to test checkout, shipping, tax, and order creation.</p>
+              <Link className="primaryButton" href="/">Shop products</Link>
+            </div>
+          )}
+
+          <div className="cartControls">
+            <label>Destination
+              <select value={country} onChange={(event) => setCountry(event.target.value)}>
+                {countries.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label>Coupon code
+              <input
+                data-testid="cart-coupon"
+                value={couponCode}
+                onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+              />
+            </label>
+            <label>Shipping method
+              <select
+                data-testid="cart-shipping-rate"
+                value={shippingRateId}
+                onChange={(event) => setShippingRateId(event.target.value)}
+              >
+                {shippingRates.map((rate) => <option key={rate.id} value={rate.id}>{rate.name}</option>)}
+              </select>
+            </label>
+          </div>
+          <p className="statusText">{message}</p>
+        </div>
+
+        <aside className="orderSummaryCard">
+          <h2>Order summary</h2>
+          {quote ? (
+            <>
+              <div className="summaryRow"><span>Subtotal</span><strong>{money(quote.subtotal, quote.currency)}</strong></div>
+              <div className="summaryRow"><span>Discount</span><strong>-{money(quote.discount, quote.currency)}</strong></div>
+              <div className="summaryRow"><span>Shipping</span><strong>{money(quote.shipping, quote.currency)}</strong></div>
+              <div className="summaryRow"><span>Tax</span><strong>{money(quote.tax, quote.currency)}</strong></div>
+              <div className="summaryRow totalRow"><span>Estimated total</span><strong>{money(quote.total, quote.currency)}</strong></div>
+              <Link className="primaryButton wideButton" data-testid="proceed-checkout" href="/checkout">Proceed to checkout</Link>
+            </>
+          ) : (
+            <>
+              <p>Add at least one item to calculate totals.</p>
+              <Link className="outlineButton wideButton" href="/">Browse products</Link>
+            </>
+          )}
+          <div className="summaryTrust">
+            <span>Secure checkout</span>
+            <span>International shipping rates</span>
+            <span>Inventory reserved after order</span>
+          </div>
+        </aside>
       </section>
     </main>
   );

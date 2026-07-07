@@ -272,12 +272,25 @@ export function getProduct(id: string) {
   return products.find((product) => product.id === id);
 }
 
-export function createProduct(input: Omit<Product, "id"> & { id?: string }) {
+export function createProduct(input: Omit<Product, "id"> & {
+  id?: string;
+  variants?: Array<Omit<ProductVariant, "id" | "productId"> & { id?: string }>;
+}) {
+  const { variants = [], ...productInput } = input;
   const product: Product = {
-    ...input,
-    id: input.id ?? `product-${Date.now()}`
+    ...productInput,
+    id: productInput.id ?? `product-${Date.now()}`
   };
   products.unshift(product);
+
+  for (const variant of variants) {
+    productVariants.unshift({
+      ...variant,
+      id: variant.id ?? `variant-${product.id}-${variant.sku}`.replace(/\s+/g, "-"),
+      productId: product.id
+    });
+  }
+
   return product;
 }
 
